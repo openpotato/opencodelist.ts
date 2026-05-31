@@ -1,0 +1,140 @@
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+- group: 'npm-package-config'
+- group: 'github-config'
+
+stages:
+
+- stage: Test
+  jobs:
+  - job: Test
+    strategy:
+      matrix:
+        Node22:
+          node.version: '22.x'
+        Node24:
+          node.version: '24.x'
+    steps:
+    - checkout: self
+      fetchDepth: 0
+    - task: UseNode@1
+      displayName: 'Install Node.js'
+      inputs:
+        version: '$(node.version)'
+    - task: Npm@1
+      displayName: 'Install dependencies'
+      inputs:
+        command: 'install'
+    - task: Npm@1
+      displayName: 'Lint'
+      inputs:
+        command: 'custom'
+        customCommand: 'run lint --if-present'
+    - task: Npm@1
+      displayName: 'Check'
+      inputs:
+        command: 'custom'
+        customCommand: 'run check --if-present'
+
+- stage: Deploy  
+  dependsOn: Test
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+  jobs:
+  - job: Deploy
+    steps:
+    - checkout: self
+      fetchDepth: 0
+    - task: UseNode@1
+      displayName: 'Install Node.js'
+      inputs:
+        version: '22.x'
+    - task: Npm@1
+      displayName: 'Install dependencies'
+      inputs:
+        command: 'install'
+    - task: Npm@1
+      displayName: 'Check'
+      inputs:
+        command: 'custom'
+        customCommand: 'run check --if-present'
+    - task: Npm@1
+      displayName: 'Package'
+      inputs:
+        command: 'custom'
+        customCommand: 'run pack'
+    - task: PowerShell@2
+      displayName: 'Push to GitHub'
+      inputs:
+        targetType: inline
+        pwsh: true
+        script: |
+
+          $ErrorActionPreference = 'Stop'
+
+          try {
+            
+            # Configure Git identity
+            git config user.name  'azure-devops-bot'
+            git config user.email 'azuredevops@stueber.nomail'
+
+            # Add 'github' remote
+            git remote add github "https://$($env:PAT)@github.com/openpotato/opencodelist.ts.git"
+
+            # Fetch remote main if it exists (ok to fail if repo is empty)
+            git fetch --prune github main
+            $fetchCode = $LASTEXITCODE
+
+            # If remote branch exists, only push when remote is an ancestor of HEAD (fast-forward safe)
+            if ($fetchCode -eq 0) {
+              git merge-base --is-ancestor github/main HEAD
+              if ($LASTEXITCODE -ne 0) {
+                Write-Error "Remote has commits not in local (or histories diverged). Aborting push."
+              }
+            }
+
+            # Push only the main branch (fast-forward or create remote if missing)
+            git push --tags github HEAD:refs/heads/main
+            if ($LASTEXITCODE -ne 0) { throw "git push failed with exit code $LASTEXITCODE" }
+            
+          }
+          finally {
+            
+            # Remove the remote so the PAT isn't left in .git/config
+            git remote remove github 2>$null | Out-Null
+            
+          }
+      env:
+        PAT: $(PAT)
+    - task: PowerShell@2
+      displayName: 'Publish to npm Registry'
+      condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+      inputs:
+        targetType: 'inline'
+        pwsh: true
+        script: |
+
+          $ErrorActionPreference = 'Stop'
+
+          try {
+
+            # Create a temporary .npmrc file containing the npm authentication token. 
+            # npm automatically reads this file when publishing.
+            "//registry.npmjs.org/:_authToken=$env:NPM_TOKEN" | Out-File `
+              -FilePath ".npmrc" `
+              -Encoding utf8
+
+             # Publish the package to the npm registry.
+            npm publish --access public
+            if ($LASTEXITCODE -ne 0) { throw "npm publish failed with exit code $LASTEXITCODE" }
+
+          }
+          finally {
+
+            # Remove the temporary .npmrc file, to avoid leaving credentials on the build agent.
+            Remove-Item ".npmrc" -ErrorAction SilentlyContinue
+
+          }
+      env:
+        NPM_TOKEN: $(NPM_TOKEN)

@@ -1,0 +1,61 @@
+{
+  "name": "opencodelist-ts",
+  "version": "0.1.0",
+  "description": "A TypeScript library for parsing and building OpenCodeList documents",
+  "type": "module",
+  "sideEffects": false,
+  "main": "dist/index.cjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./models": {
+      "types": "./dist/models/index.d.ts",
+      "import": "./dist/models/index.js",
+      "require": "./dist/models/index.cjs"
+    },
+    "./dictionaries": {
+      "types": "./dist/dictionaries/index.d.ts",
+      "import": "./dist/dictionaries/index.js",
+      "require": "./dist/dictionaries/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "test:contract": "vitest run -c vitest.contract.config.ts",
+    "check": "npm run build && npm run typecheck && npm run test && npm run test:contract",
+    "prepack": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/openpotato/opencodelist.ts.git"
+  },
+  "author": "STÜBER SYSTEMS GmbH",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/openpotato/opencodelist.ts/issues"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.19",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.7"
+  },
+  "keywords": [
+    "typescript",
+    "opencodelist"
+  ]
+}
