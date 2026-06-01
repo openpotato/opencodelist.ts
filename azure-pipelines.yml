@@ -63,7 +63,7 @@ stages:
       displayName: 'Package'
       inputs:
         command: 'custom'
-        customCommand: 'run pack'
+        customCommand: 'pack'
     - task: PowerShell@2
       displayName: 'Push to GitHub'
       inputs:
