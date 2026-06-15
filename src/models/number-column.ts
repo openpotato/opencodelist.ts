@@ -1,6 +1,12 @@
-import { Column } from "./column.js";
+/*---------------------------------------------------------
+ *  Copyright (c) STÜBER SYSTEMS GmbH. All rights reserved.
+ *  Licensed under the MIT License.
+ *---------------------------------------------------------*/
+
 import { PropertyNames } from "./../dictionaries/property-names.js";
 import { TypeConsts } from "./../dictionaries/type-consts.js";
+import { JsonUtils } from "../utils/json-utils.js";
+import { Column } from "./column.js";
 
 /**
  * This is a float type column.
@@ -10,22 +16,22 @@ export class NumberColumn extends Column {
     /**
      * A number value representing an exclusive upper limit for a value.
      */
-    public exclusiveMaxValue: number | null = null;
+    public exclusiveMaxValue?: number;
 
     /**
      * A number value representing an exclusive lower limit for a value.
      */
-    public exclusiveMinValue: number | null = null;
+    public exclusiveMinValue?: number;
 
     /**
      * A number value that specifies the maximum allowed value.
      */
-    public maxValue: number | null = null;
+    public maxValue?: number;
 
     /**
      * A number value that specifies the minimum allowed value.
      */
-    public minValue: number | null = null;
+    public minValue?: number;
 
     /**
      * Parses a JSON object into a NumberColumn instance.
@@ -33,52 +39,13 @@ export class NumberColumn extends Column {
     static parse(json: Record<string, unknown>): NumberColumn {
         const column = new NumberColumn();
 
-        const id = json[PropertyNames.Id];
-        if (typeof id !== "string") {
-            throw new Error(`Missing required property '${PropertyNames.Id}'.`);
-        }
-        column.id = id;
-
-        const name = json[PropertyNames.Name];
-        if (typeof name !== "string") {
-            throw new Error(`Missing required property '${PropertyNames.Name}'.`);
-        }
-        column.name = name;
-
-        const description = json[PropertyNames.Description];
-        if (typeof description === "string") {
-            column.description = description;
-        }
-
-        const nullable = json[PropertyNames.Nullable];
-        if (typeof nullable === "boolean") {
-            column.nullable = nullable;
-        }
-
-        const optional = json[PropertyNames.Optional];
-        if (typeof optional === "boolean") {
-            column.optional = optional;
-        }
-
-        const minValue = json[PropertyNames.MinValue];
-        if (typeof minValue === "number") {
-            column.minValue = minValue;
-        }
-
-        const maxValue = json[PropertyNames.MaxValue];
-        if (typeof maxValue === "number") {
-            column.maxValue = maxValue;
-        }
-
-        const exclusiveMinValue = json[PropertyNames.ExclusiveMinValue];
-        if (typeof exclusiveMinValue === "number") {
-            column.exclusiveMinValue = exclusiveMinValue;
-        }
-
-        const exclusiveMaxValue = json[PropertyNames.ExclusiveMaxValue];
-        if (typeof exclusiveMaxValue === "number") {
-            column.exclusiveMaxValue = exclusiveMaxValue;
-        }
+        column.id = JsonUtils.getRequiredString(json, PropertyNames.Id);
+        column.name = JsonUtils.getRequiredString(json, PropertyNames.Name);
+        column.description = JsonUtils.getString(json, PropertyNames.Description) ?? undefined;
+        column.nullable = JsonUtils.getBoolean(json, PropertyNames.Nullable) ?? undefined;
+        column.optional = JsonUtils.getBoolean(json, PropertyNames.Optional) ?? undefined;
+        column.minValue = JsonUtils.getNumber(json, PropertyNames.MinValue) ?? undefined;
+        column.maxValue = JsonUtils.getNumber(json, PropertyNames.MaxValue) ?? undefined;
 
         return column;
     }

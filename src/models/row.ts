@@ -1,3 +1,8 @@
+/*---------------------------------------------------------
+ *  Copyright (c) STÜBER SYSTEMS GmbH. All rights reserved.
+ *  Licensed under the MIT License.
+ *---------------------------------------------------------*/
+
 import { BooleanColumn } from "./boolean-column.js";
 import { Column } from "./column.js";
 import { DateOnlyColumn } from "./date-only-column.js";

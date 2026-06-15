@@ -1,4 +1,10 @@
+/*---------------------------------------------------------
+ *  Copyright (c) STÜBER SYSTEMS GmbH. All rights reserved.
+ *  Licensed under the MIT License.
+ *---------------------------------------------------------*/
+
 import { PropertyNames } from './../dictionaries/property-names.js';
+import { JsonUtils } from "./../utils/json-utils.js";
 
 /**
  * Human-readable description.
@@ -26,24 +32,9 @@ export class Description {
     static parse(json: Record<string, unknown>): Description {
         const description = new Description();
 
-        const language =
-            typeof json[PropertyNames.Language] === "string"
-                ? (json[PropertyNames.Language] as string)
-                : null;
-
-        const format = json[PropertyNames.Format];
-        if (typeof format !== "string") {
-            throw new Error(`Missing required property '${PropertyNames.Format}'.`);
-        }
-
-        const content = json[PropertyNames.Content];
-        if (typeof content !== "string") {
-            throw new Error(`Missing required property '${PropertyNames.Content}'.`);
-        }
-
-        description.content = content;
-        description.format = format;
-        description.language = language;
+        description.format = JsonUtils.getRequiredString(json, PropertyNames.Format);
+        description.content = JsonUtils.getRequiredString(json, PropertyNames.Content);
+        description.language = JsonUtils.getString(json, PropertyNames.Language) ?? null;
 
         return description;
     }

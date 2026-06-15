@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.VisualStudio.JavaScript.Sdk/1.0.5171056">
+  <PropertyGroup>
+    <StartupCommand>npm run dev</StartupCommand>
+    <BuildCommand>npm run build</BuildCommand>
+    <TestCommand>npm test</TestCommand>
+  </PropertyGroup>
+  <ItemGroup>
+    <TypeScriptConfiguration Include="tsconfig.vitest.json" />
+    <TypeScriptConfiguration Include="vitest.config.ts" />
+  </ItemGroup>
+</Project>

@@ -1,4 +1,10 @@
+/*---------------------------------------------------------
+ *  Copyright (c) STÜBER SYSTEMS GmbH. All rights reserved.
+ *  Licensed under the MIT License.
+ *---------------------------------------------------------*/
+
 import { PropertyNames } from "./../dictionaries/property-names.js";
+import { JsonUtils } from "./../utils/json-utils.js";
 
 /**
  * Source information for a general identifier.
@@ -8,7 +14,7 @@ export class IdentifierSource {
     /**
      * Human-readable name of the source.
      */
-    public longName: string | null = null;
+    public longName?: string;
 
     /**
      * Short name of the source.
@@ -18,31 +24,21 @@ export class IdentifierSource {
     /**
      * More information about the source.
      */
-    public url: string | null = null;
+    public url?: string;
 
     /**
      * Parses a JSON object into an IdentifierSource instance.
      */
-    static parse(json: Record<string, unknown>): IdentifierSource {
+    public static parse(json: Record<string, unknown> | undefined): IdentifierSource | undefined {
+        if (json == null) {
+            return undefined;
+        }
+
         const source = new IdentifierSource();
 
-        const shortName = json[PropertyNames.ShortName];
-        if (typeof shortName !== "string") {
-            throw new Error(
-                `Missing required property '${PropertyNames.ShortName}'.`
-            );
-        }
-        source.shortName = shortName;
-
-        const longName = json[PropertyNames.LongName];
-        if (typeof longName === "string") {
-            source.longName = longName;
-        }
-
-        const url = json[PropertyNames.Url];
-        if (typeof url === "string") {
-            source.url = url;
-        }
+        source.shortName = JsonUtils.getRequiredString(json, PropertyNames.ShortName);
+        source.longName = JsonUtils.getString(json, PropertyNames.LongName) ?? undefined;
+        source.url = JsonUtils.getString(json, PropertyNames.Url) ?? undefined;
 
         return source;
     }

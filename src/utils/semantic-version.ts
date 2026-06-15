@@ -1,3 +1,8 @@
+/*---------------------------------------------------------
+ *  Copyright (c) STÜBER SYSTEMS GmbH. All rights reserved.
+ *  Licensed under the MIT License.
+ *---------------------------------------------------------*/
+
 /**
  * Semantic version type, following closely https://semver.org
  */

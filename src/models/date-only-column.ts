@@ -1,5 +1,11 @@
+/*---------------------------------------------------------
+ *  Copyright (c) STÜBER SYSTEMS GmbH. All rights reserved.
+ *  Licensed under the MIT License.
+ *---------------------------------------------------------*/
+
 import { PropertyNames } from "./../dictionaries/property-names.js";
 import { TypeConsts } from "./../dictionaries/type-consts.js";
+import { JsonUtils } from "./../utils/json-utils.js";
 import { Column } from "./column.js";
 
 /**
@@ -13,12 +19,12 @@ export class DateOnlyColumn extends Column {
     /**
      * A value that specifies the maximum allowed value.
      */
-    public maxValue: string | null = null;
+    public maxValue?: string;
 
     /**
      * A value that specifies the minimum allowed value.
      */
-    public minValue: string | null = null;
+    public minValue?: string;
 
     /**
      * Parses a JSON object into a DateOnlyColumn instance.
@@ -26,42 +32,13 @@ export class DateOnlyColumn extends Column {
     static parse(json: Record<string, unknown>): DateOnlyColumn {
         const column = new DateOnlyColumn();
 
-        const id = json[PropertyNames.Id];
-        if (typeof id !== "string") {
-            throw new Error(`Missing required property '${PropertyNames.Id}'.`);
-        }
-        column.id = id;
-
-        const name = json[PropertyNames.Name];
-        if (typeof name !== "string") {
-            throw new Error(`Missing required property '${PropertyNames.Name}'.`);
-        }
-        column.name = name;
-
-        const description = json[PropertyNames.Description];
-        if (typeof description === "string") {
-            column.description = description;
-        }
-
-        const nullable = json[PropertyNames.Nullable];
-        if (typeof nullable === "boolean") {
-            column.nullable = nullable;
-        }
-
-        const optional = json[PropertyNames.Optional];
-        if (typeof optional === "boolean") {
-            column.optional = optional;
-        }
-
-        const minValue = json[PropertyNames.MinValue];
-        if (typeof minValue === "string") {
-            column.minValue = minValue;
-        }
-
-        const maxValue = json[PropertyNames.MaxValue];
-        if (typeof maxValue === "string") {
-            column.maxValue = maxValue;
-        }
+        column.id = JsonUtils.getRequiredString(json, PropertyNames.Id);
+        column.name = JsonUtils.getRequiredString(json, PropertyNames.Name);
+        column.description = JsonUtils.getString(json, PropertyNames.Description) ?? undefined;
+        column.nullable = JsonUtils.getBoolean(json, PropertyNames.Nullable) ?? undefined;
+        column.optional = JsonUtils.getBoolean(json, PropertyNames.Optional) ?? undefined;
+        column.minValue = JsonUtils.getString(json, PropertyNames.MinValue) ?? undefined;
+        column.maxValue = JsonUtils.getString(json, PropertyNames.MaxValue) ?? undefined;
 
         return column;
     }

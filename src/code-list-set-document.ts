@@ -1,3 +1,8 @@
+/*---------------------------------------------------------
+ *  Copyright (c) STÜBER SYSTEMS GmbH. All rights reserved.
+ *  Licensed under the MIT License.
+ *---------------------------------------------------------*/
+
 import { PropertyNames } from "./dictionaries/property-names.js";
 import { SemanticVersion } from "./utils/semantic-version.js";
 import { Annotation } from "./models/annotation.js";
@@ -16,7 +21,6 @@ export class CodeListSetDocument extends Document {
      */
     constructor() {
         super();
-
         this.documentRefs = new DocumentRefs(this);
     }
 
@@ -39,7 +43,7 @@ export class CodeListSetDocument extends Document {
 
         if (
             SemanticVersion.from(version).compareTo(
-                Document.getVersion()
+                Document.getMinimumCompatibleVersion()
             ) < 0
         ) {
             throw new CodeListParserError(
@@ -142,7 +146,7 @@ export class CodeListSetDocument extends Document {
         }
 
         const root: Record<string, unknown> = {
-            [PropertyNames.OpenCodeList]: Document.getVersion().toString(),
+            [PropertyNames.OpenCodeList]: Document.getMinimumCompatibleVersion().toString(),
             [PropertyNames.CodeListSet]: codeListSet,
         };
 

@@ -1,7 +1,13 @@
+/*---------------------------------------------------------
+ *  Copyright (c) STÜBER SYSTEMS GmbH. All rights reserved.
+ *  Licensed under the MIT License.
+ *---------------------------------------------------------*/
+
+import { PropertyNames } from "./../dictionaries/property-names.js";
+import { JsonUtils } from "./../utils/json-utils.js";
 import { Columns } from "./columns.js";
 import { KeyRef } from "./key-ref.js";
-import { PropertyNames } from "./../dictionaries/property-names.js";
-import type { CodeListDocument } from "./../code-list-document.js";
+import { CodeListDocument } from "./../code-list-document.js";
 
 /**
  * A foreign key definition.
@@ -13,6 +19,7 @@ export class ForeignKey {
      */
     constructor(document: CodeListDocument) {
         this.columns = new Columns(document);
+        this.keyRef = new KeyRef();
     }
 
     /**
@@ -23,61 +30,37 @@ export class ForeignKey {
     /**
      * A short description of the foreign key.
      */
-    public description: string | null = null;
+    public description?: string;
 
     /**
      * The ID of the foreign key.
      */
-    public id: string | null = null;
+    public id!: string;
 
     /**
      * The name of the foreign key.
      */
-    public name: string | null = null;
+    public name?: string;
 
     /**
      * A reference to a key in another code list.
      */
-    public keyRef: KeyRef | null = null;
+    public keyRef!: KeyRef;
 
     /**
      * Parses a JSON object into a ForeignKey instance.
      */
-    static parse(
-        json: Record<string, unknown>,
-        codeList: CodeListDocument
-    ): ForeignKey {
+    static parse(json: Record<string, unknown>, codeList: CodeListDocument): ForeignKey {
         const foreignKey = new ForeignKey(codeList);
 
-        const id = json[PropertyNames.Id];
-        if (typeof id === "string") {
-            foreignKey.id = id;
-        }
+        foreignKey.id = JsonUtils.getRequiredString(json, PropertyNames.Id);
+        foreignKey.name = JsonUtils.getString(json, PropertyNames.Name) ?? undefined;
+        foreignKey.description = JsonUtils.getString(json, PropertyNames.Description) ?? undefined;
+        foreignKey.keyRef = KeyRef.parse(JsonUtils.getRequiredObject(json, PropertyNames.KeyRef));
 
-        const name = json[PropertyNames.Name];
-        if (typeof name === "string") {
-            foreignKey.name = name;
-        }
-
-        const description = json[PropertyNames.Description];
-        if (typeof description === "string") {
-            foreignKey.description = description;
-        }
-
-        const columnIds = json[PropertyNames.ColumnIds];
-        if (Array.isArray(columnIds)) {
+        const columnIds = JsonUtils.getArray(json, PropertyNames.ColumnIds);
+        if (columnIds !== undefined) {
             foreignKey.columns.parseAndAdd(columnIds);
-        }
-
-        const keyRef = json[PropertyNames.KeyRef];
-        if (
-            keyRef != null &&
-            typeof keyRef === "object" &&
-            !Array.isArray(keyRef)
-        ) {
-            foreignKey.keyRef = KeyRef.parse(
-                keyRef as Record<string, unknown>
-            );
         }
 
         return foreignKey;

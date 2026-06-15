@@ -1,4 +1,10 @@
+/*---------------------------------------------------------
+ *  Copyright (c) STÜBER SYSTEMS GmbH. All rights reserved.
+ *  Licensed under the MIT License.
+ *---------------------------------------------------------*/
+
 import { PropertyNames } from "./../dictionaries/property-names.js";
+import { JsonUtils } from "./../utils/json-utils.js";
 import { Description } from "./description.js";
 
 /**
@@ -9,7 +15,7 @@ export class Annotation {
     /**
      * Machine-readable information.
      */
-    public appInfo: Record<string, unknown> | null = null;
+    public appInfo?: Record<string, unknown>;
 
     /**
      * Human-readable descriptions.
@@ -22,25 +28,15 @@ export class Annotation {
     static parse(json: Record<string, unknown>): Annotation {
         const annotation = new Annotation();
 
-        const descriptions = json[PropertyNames.Descriptions];
-        if (Array.isArray(descriptions)) {
-            for (const item of descriptions) {
-                if (item != null && typeof item === "object" && !Array.isArray(item)) {
-                    annotation.descriptions.push(
-                        Description.parse(item as Record<string, unknown>)
-                    );
-                }
-            }
-        } else {
-            throw new Error(
-                `Missing required property '${PropertyNames.Descriptions}'.`
-            );
-        }
+        annotation.descriptions.push(
+            ...JsonUtils.getRequiredObjectArray(
+                json,
+                PropertyNames.Descriptions,
+                Description.parse,
+            ),
+        );
 
-        const appInfo = json[PropertyNames.AppInfo];
-        if (appInfo != null && typeof appInfo === "object" && !Array.isArray(appInfo)) {
-            annotation.appInfo = appInfo as Record<string, unknown>;
-        }
+        annotation.appInfo = JsonUtils.getObject(json, PropertyNames.AppInfo) ?? undefined;
 
         return annotation;
     }

@@ -1,3 +1,10 @@
+/*---------------------------------------------------------
+ *  Copyright (c) STÜBER SYSTEMS GmbH. All rights reserved.
+ *  Licensed under the MIT License.
+ *---------------------------------------------------------*/
+
+import { PropertyNames } from "./../dictionaries/property-names.js";
+import { TypeConsts } from "./../dictionaries/type-consts.js";
 import { BooleanColumn } from "./boolean-column.js";
 import { CodeListParserError } from "./../code-list-parser-error.js";
 import { Column } from "./column.js";
@@ -8,10 +15,8 @@ import { EnumSetColumn } from "./enum-set-column.js";
 import { IntegerColumn } from "./integer-column.js";
 import { JsonColumn } from "./json-column.js";
 import { NumberColumn } from "./number-column.js";
-import { PropertyNames } from "./../dictionaries/property-names.js";
 import { StringColumn } from "./string-column.js";
 import { TimeOnlyColumn } from "./time-only-column.js";
-import { TypeConsts } from "./../dictionaries/type-consts.js";
 import type { CodeListDocument } from "./../code-list-document.js";
 
 /**

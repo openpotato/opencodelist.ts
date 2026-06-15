@@ -1,6 +1,12 @@
-import { Column } from "./column.js";
+/*---------------------------------------------------------
+ *  Copyright (c) STÜBER SYSTEMS GmbH. All rights reserved.
+ *  Licensed under the MIT License.
+ *---------------------------------------------------------*/
+
 import { PropertyNames } from "./../dictionaries/property-names.js";
 import { TypeConsts } from "./../dictionaries/type-consts.js";
+import { JsonUtils } from "../utils/json-utils.js";
+import { Column } from "./column.js";
 
 /**
  * This is a string type column.
@@ -9,22 +15,22 @@ export class StringColumn extends Column {
     /**
      * A language tag according to BCP 47 to specify the language of the content.
      */
-    public language: string | null = null;
+    public language?: string;
 
     /**
      * An integer that specifies the maximum character length of the value.
      */
-    public maxLength: number | null = null;
+    public maxLength?: number;
 
     /**
      * An integer that specifies the minimum character length of the value.
      */
-    public minLength: number | null = null;
+    public minLength?: number;
 
     /**
      * A string that specifies a regular expression that must match against each value.
      */
-    public pattern: string | null = null;
+    public pattern?: string;
 
     /**
      * Parses a JSON object into a StringColumn instance.
@@ -32,52 +38,15 @@ export class StringColumn extends Column {
     static parse(json: Record<string, unknown>): StringColumn {
         const column = new StringColumn();
 
-        const id = json[PropertyNames.Id];
-        if (typeof id !== "string") {
-            throw new Error(`Missing required property '${PropertyNames.Id}'.`);
-        }
-        column.id = id;
-
-        const name = json[PropertyNames.Name];
-        if (typeof name !== "string") {
-            throw new Error(`Missing required property '${PropertyNames.Name}'.`);
-        }
-        column.name = name;
-
-        const description = json[PropertyNames.Description];
-        if (typeof description === "string") {
-            column.description = description;
-        }
-
-        const nullable = json[PropertyNames.Nullable];
-        if (typeof nullable === "boolean") {
-            column.nullable = nullable;
-        }
-
-        const optional = json[PropertyNames.Optional];
-        if (typeof optional === "boolean") {
-            column.optional = optional;
-        }
-
-        const minLength = json[PropertyNames.MinLength];
-        if (typeof minLength === "number") {
-            column.minLength = minLength;
-        }
-
-        const maxLength = json[PropertyNames.MaxLength];
-        if (typeof maxLength === "number") {
-            column.maxLength = maxLength;
-        }
-
-        const pattern = json[PropertyNames.Pattern];
-        if (typeof pattern === "string") {
-            column.pattern = pattern;
-        }
-
-        const language = json[PropertyNames.Language];
-        if (typeof language === "string") {
-            column.language = language;
-        }
+        column.id = JsonUtils.getRequiredString(json, PropertyNames.Id);
+        column.name = JsonUtils.getRequiredString(json, PropertyNames.Name);
+        column.description = JsonUtils.getString(json, PropertyNames.Description) ?? undefined;
+        column.nullable = JsonUtils.getBoolean(json, PropertyNames.Nullable) ?? undefined;
+        column.optional = JsonUtils.getBoolean(json, PropertyNames.Optional) ?? undefined;
+        column.minLength = JsonUtils.getNumber(json, PropertyNames.MinLength) ?? undefined;
+        column.maxLength = JsonUtils.getNumber(json, PropertyNames.MaxLength) ?? undefined;
+        column.pattern = JsonUtils.getString(json, PropertyNames.Pattern) ?? undefined;
+        column.language = JsonUtils.getString(json, PropertyNames.Language) ?? undefined;
 
         return column;
     }

@@ -1,5 +1,11 @@
-import { IdentifierSource } from "./identifier-source.js";
+/*---------------------------------------------------------
+ *  Copyright (c) STÜBER SYSTEMS GmbH. All rights reserved.
+ *  Licensed under the MIT License.
+ *---------------------------------------------------------*/
+
 import { PropertyNames } from "./../dictionaries/property-names.js";
+import { JsonUtils } from "./../utils/json-utils.js";
+import { IdentifierSource } from "./identifier-source.js";
 
 /**
  * A general identifier.
@@ -14,32 +20,20 @@ export class Identifier {
     /**
      * The source of the identifier.
      */
-    public source: IdentifierSource | null = null;
+    public source?: IdentifierSource;
 
     /**
      * Parses a JSON object into an Identifier instance.
      */
-    static parse(json: Record<string, unknown>): Identifier {
+    public static parse(json: Record<string, unknown> | undefined): Identifier | undefined {
+        if (json == null) {
+            return undefined;
+        }
+
         const identifier = new Identifier();
 
-        const value = json[PropertyNames.Value];
-        if (typeof value !== "string") {
-            throw new Error(
-                `Missing required property '${PropertyNames.Value}'.`
-            );
-        }
-        identifier.value = value;
-
-        const source = json[PropertyNames.Source];
-        if (
-            source != null &&
-            typeof source === "object" &&
-            !Array.isArray(source)
-        ) {
-            identifier.source = IdentifierSource.parse(
-                source as Record<string, unknown>
-            );
-        }
+        identifier.value = JsonUtils.getRequiredString(json, PropertyNames.Value);
+        identifier.source = IdentifierSource.parse(JsonUtils.getObject(json, PropertyNames.Source));
 
         return identifier;
     }

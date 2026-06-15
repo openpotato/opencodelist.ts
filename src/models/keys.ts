@@ -1,3 +1,8 @@
+/*---------------------------------------------------------
+ *  Copyright (c) STÜBER SYSTEMS GmbH. All rights reserved.
+ *  Licensed under the MIT License.
+ *---------------------------------------------------------*/
+
 import { Column } from "./column.js";
 import { Key } from "./key.js";
 import type { CodeListDocument } from "./../code-list-document.js";

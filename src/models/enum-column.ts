@@ -1,7 +1,13 @@
-import { Column } from "./column.js";
-import { EnumMember } from "./enum-member.js";
+/*---------------------------------------------------------
+ *  Copyright (c) STÜBER SYSTEMS GmbH. All rights reserved.
+ *  Licensed under the MIT License.
+ *---------------------------------------------------------*/
+
 import { PropertyNames } from "./../dictionaries/property-names.js";
 import { TypeConsts } from "./../dictionaries/type-consts.js";
+import { JsonUtils } from "../utils/json-utils.js";
+import { Column } from "./column.js";
+import { EnumMember } from "./enum-member.js";
 
 /**
  * An enumeration type column.
@@ -11,7 +17,7 @@ export class EnumColumn extends Column {
     /**
      * A language tag according to BCP 47 to specify the language of the content.
      */
-    public language: string | null = null;
+    public language?: string;
 
     /**
      * The list of allowed values for this enumeration.
@@ -24,51 +30,16 @@ export class EnumColumn extends Column {
     static parse(json: Record<string, unknown>): EnumColumn {
         const column = new EnumColumn();
 
-        const id = json[PropertyNames.Id];
-        if (typeof id !== "string") {
-            throw new Error(`Missing required property '${PropertyNames.Id}'.`);
-        }
-        column.id = id;
+        column.id = JsonUtils.getRequiredString(json, PropertyNames.Id);
+        column.name = JsonUtils.getRequiredString(json, PropertyNames.Name);
+        column.description = JsonUtils.getString(json, PropertyNames.Description) ?? undefined;
+        column.nullable = JsonUtils.getBoolean(json, PropertyNames.Nullable) ?? undefined;
+        column.optional = JsonUtils.getBoolean(json, PropertyNames.Optional) ?? undefined;
+        column.language = JsonUtils.getString(json, PropertyNames.Language) ?? undefined;
 
-        const name = json[PropertyNames.Name];
-        if (typeof name !== "string") {
-            throw new Error(`Missing required property '${PropertyNames.Name}'.`);
-        }
-        column.name = name;
-
-        const description = json[PropertyNames.Description];
-        if (typeof description === "string") {
-            column.description = description;
-        }
-
-        const nullable = json[PropertyNames.Nullable];
-        if (typeof nullable === "boolean") {
-            column.nullable = nullable;
-        }
-
-        const optional = json[PropertyNames.Optional];
-        if (typeof optional === "boolean") {
-            column.optional = optional;
-        }
-
-        const members = json[PropertyNames.Members];
-        if (Array.isArray(members)) {
-            for (const member of members) {
-                if (
-                    member != null &&
-                    typeof member === "object" &&
-                    !Array.isArray(member)
-                ) {
-                    column.members.push(
-                        EnumMember.parse(member as Record<string, unknown>)
-                    );
-                }
-            }
-        }
-
-        const language = json[PropertyNames.Language];
-        if (typeof language === "string") {
-            column.language = language;
+        const members = JsonUtils.getObjectArray(json, PropertyNames.Members, (member) => EnumMember.parse(member));
+        if (members !== undefined) {
+            column.members.push(...members);
         }
 
         return column;

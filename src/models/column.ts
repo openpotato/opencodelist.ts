@@ -1,3 +1,8 @@
+/*---------------------------------------------------------
+ *  Copyright (c) STÜBER SYSTEMS GmbH. All rights reserved.
+ *  Licensed under the MIT License.
+ *---------------------------------------------------------*/
+
 /**
  * A code list column.
  */
@@ -16,18 +21,18 @@ export abstract class Column {
     /**
      * A human-readable description of the code list column.
      */
-    public description: string | null = null;
+    public description?: string;
 
     /**
      * A boolean that specifies whether the column value can be null.
      */
-    public nullable: boolean | null = null;
+    public nullable?: boolean;
 
     /**
      * A boolean that defines whether this column is optional,
      * i.e. whether it can be completely omitted from a data row.
      */
-    public optional: boolean | null = null;
+    public optional?: boolean;
 
     /**
      * Converts this instance to a JSON object.

@@ -1,6 +1,11 @@
-import { Column } from "./column.js";
+/*---------------------------------------------------------
+ *  Copyright (c) STÜBER SYSTEMS GmbH. All rights reserved.
+ *  Licensed under the MIT License.
+ *---------------------------------------------------------*/
+
 import { ForeignKey } from "./foreign-key.js";
-import type { CodeListDocument } from "./../code-list-document.js";
+import { Column } from "./column.js";
+import { CodeListDocument } from "./../code-list-document.js";
 
 /**
  * Foreign keys of a code list.

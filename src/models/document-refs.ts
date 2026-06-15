@@ -1,10 +1,15 @@
+/*---------------------------------------------------------
+ *  Copyright (c) STÜBER SYSTEMS GmbH. All rights reserved.
+ *  Licensed under the MIT License.
+ *---------------------------------------------------------*/
+
 import { PropertyNames } from "./../dictionaries/property-names.js";
 import { TypeConsts } from "./../dictionaries/type-consts.js";
 import { CodeListParserError } from "./../code-list-parser-error.js";
-import { CodeListDocumentRef } from "./code-list-document-ref.js";
+import { CodeListSetDocument } from "./../code-list-set-document.js";
 import { CodeListSetDocumentRef } from "./code-list-set-document-ref.js";
+import { CodeListDocumentRef } from "./code-list-document-ref.js";
 import { DocumentRef } from "./document-ref.js";
-import type { CodeListSetDocument } from "./../code-list-set-document.js";
 
 /**
  * An enumerable list of document references.

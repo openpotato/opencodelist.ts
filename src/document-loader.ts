@@ -1,3 +1,8 @@
+/*---------------------------------------------------------
+ *  Copyright (c) STÜBER SYSTEMS GmbH. All rights reserved.
+ *  Licensed under the MIT License.
+ *---------------------------------------------------------*/
+
 import { PropertyNames } from "./dictionaries/property-names.js";
 import { SemanticVersion } from "./utils/semantic-version.js";
 import { CodeListDocument } from "./code-list-document.js";
@@ -17,7 +22,7 @@ export class DocumentLoader {
             );
         }
 
-        if (SemanticVersion.from(version).compareTo(Document.getVersion()) < 0) {
+        if (SemanticVersion.from(version).compareTo(Document.getMinimumCompatibleVersion()) < 0) {
             throw new CodeListParserError(
                 `Version ${version} of OpenCodeList not supported.`
             );

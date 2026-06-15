@@ -1,5 +1,11 @@
-import { Identifier } from "./identifier.js";
+/*---------------------------------------------------------
+ *  Copyright (c) STÜBER SYSTEMS GmbH. All rights reserved.
+ *  Licensed under the MIT License.
+ *---------------------------------------------------------*/
+
 import { PropertyNames } from "./../dictionaries/property-names.js";
+import { JsonUtils } from "./../utils/json-utils.js";
+import { Identifier } from "./identifier.js";
 
 /**
  * Publisher that is responsible for publication and/or maintenance of the document.
@@ -9,12 +15,12 @@ export class Publisher {
     /**
      * Identifier for the publisher.
      */
-    public identifier: Identifier | null = null;
+    public identifier?: Identifier;
 
     /**
      * Human-readable name for the publisher.
      */
-    public longName: string | null = null;
+    public longName?: string;
 
     /**
      * Short name for the publisher.
@@ -24,7 +30,7 @@ export class Publisher {
     /**
      * More information about the publisher.
      */
-    public url: string | null = null;
+    public url?: string;
 
     /**
      * Parses a JSON object into a Publisher instance.
@@ -32,34 +38,10 @@ export class Publisher {
     static parse(json: Record<string, unknown>): Publisher {
         const publisher = new Publisher();
 
-        const shortName = json[PropertyNames.ShortName];
-        if (typeof shortName !== "string") {
-            throw new Error(
-                `Missing required property '${PropertyNames.ShortName}'.`
-            );
-        }
-        publisher.shortName = shortName;
-
-        const longName = json[PropertyNames.LongName];
-        if (typeof longName === "string") {
-            publisher.longName = longName;
-        }
-
-        const identifier = json[PropertyNames.Identifier];
-        if (
-            identifier != null &&
-            typeof identifier === "object" &&
-            !Array.isArray(identifier)
-        ) {
-            publisher.identifier = Identifier.parse(
-                identifier as Record<string, unknown>
-            );
-        }
-
-        const url = json[PropertyNames.Url];
-        if (typeof url === "string") {
-            publisher.url = url;
-        }
+        publisher.shortName = JsonUtils.getRequiredString(json, PropertyNames.ShortName);
+        publisher.longName = JsonUtils.getString(json, PropertyNames.LongName) ?? undefined;
+        publisher.url = JsonUtils.getString(json, PropertyNames.Url) ?? undefined;
+        publisher.identifier = Identifier.parse(JsonUtils.getObject(json, PropertyNames.Identifier));
 
         return publisher;
     }

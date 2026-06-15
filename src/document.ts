@@ -1,3 +1,8 @@
+/*---------------------------------------------------------
+ *  Copyright (c) STÜBER SYSTEMS GmbH. All rights reserved.
+ *  Licensed under the MIT License.
+ *---------------------------------------------------------*/
+
 import { Annotation } from "./models/annotation.js";
 import { Identification } from "./models/identification.js";
 import { SemanticVersion } from "./utils/semantic-version.js";
@@ -5,7 +10,7 @@ import { SemanticVersion } from "./utils/semantic-version.js";
 /**
  * The OpenCodeList version supported by this library.
  */
-export const OPEN_CODE_LIST_VERSION = "0.3.0" as const;
+export const MINIMUM_COMPATIBLE_OPEN_CODE_LIST_VERSION = "0.3.0" as const;
 
 /**
  * Options for JSON serialization.
@@ -28,7 +33,8 @@ export interface SerializeOptions {
  * CodeListSetDocument.
  */
 export abstract class Document {
-    private _metaOnly = true;
+    private static readonly implementedVersion = new SemanticVersion(0, 3, 0);
+    private static readonly minimumCompatibleVersion = new SemanticVersion(0, 3, 0);
 
     /**
      * Creates a new instance of the Document class.
@@ -53,7 +59,7 @@ export abstract class Document {
     /**
      * Comments for the document.
      */
-    public readonly comments: string[] = [];
+    public comments: string[] = [];
 
     /**
      * Meta information about the document.
@@ -63,19 +69,29 @@ export abstract class Document {
     /**
      * TRUE if this document is a meta document.
      */
-    get metaOnly(): boolean {
-        return this._metaOnly;
-    }
+    public metaOnly: boolean = true;
 
-    set metaOnly(value: boolean) {
-        this._metaOnly = value;
+    /**
+     * The implemented OpenCodeList version as string
+     */
+    public readonly version = Document.getImplementedVersion();
+
+    /**
+     * Returns the implemented OpenCodeList version.
+     * 
+     * @returns An OpenCodeList version
+     */
+    public static getImplementedVersion(): SemanticVersion {
+        return Document.implementedVersion;
     }
 
     /**
-     * Returns the supported OpenCodeList version.
+     * Returns the minimum compatible OpenCodeList version.
+     * 
+     * @returns An OpenCodeList version
      */
-    static getVersion(): SemanticVersion {
-        return SemanticVersion.from(OPEN_CODE_LIST_VERSION);
+    public static getMinimumCompatibleVersion(): SemanticVersion {
+        return Document.minimumCompatibleVersion;
     }
 
     /**
@@ -93,7 +109,7 @@ export abstract class Document {
      */
     clearContent(convertToMetaOnly: boolean): void {
         if (convertToMetaOnly) {
-            this._metaOnly = true;
+            this.metaOnly = true;
         }
     }
 

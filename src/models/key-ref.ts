@@ -1,5 +1,11 @@
-import { CodeListDocumentRef } from "./code-list-document-ref.js";
+/*---------------------------------------------------------
+ *  Copyright (c) STÜBER SYSTEMS GmbH. All rights reserved.
+ *  Licensed under the MIT License.
+ *---------------------------------------------------------*/
+
 import { PropertyNames } from "./../dictionaries/property-names.js";
+import { JsonUtils } from "./../utils/json-utils.js";
+import { CodeListDocumentRef } from "./code-list-document-ref.js";
 
 /**
  * Reference to a key in an external code list.
@@ -22,23 +28,11 @@ export class KeyRef {
     static parse(json: Record<string, unknown>): KeyRef {
         const reference = new KeyRef();
 
-        const codeListRef = json[PropertyNames.CodeListRef];
-        if (
-            codeListRef == null ||
-            typeof codeListRef !== "object" ||
-            Array.isArray(codeListRef)
-        ) {
-            throw new Error(`Missing required property '${PropertyNames.CodeListRef}'.`);
-        }
         reference.codeListRef = CodeListDocumentRef.parse(
-            codeListRef as Record<string, unknown>
+            JsonUtils.getRequiredObject(json, PropertyNames.CodeListRef)
         );
 
-        const keyId = json[PropertyNames.KeyId];
-        if (typeof keyId !== "string") {
-            throw new Error(`Missing required property '${PropertyNames.KeyId}'.`);
-        }
-        reference.keyId = keyId;
+        reference.keyId = JsonUtils.getRequiredString(json, PropertyNames.KeyId);
 
         return reference;
     }

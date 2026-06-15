@@ -1,4 +1,10 @@
+/*---------------------------------------------------------
+ *  Copyright (c) STÜBER SYSTEMS GmbH. All rights reserved.
+ *  Licensed under the MIT License.
+ *---------------------------------------------------------*/
+
 import { PropertyNames } from "./../dictionaries/property-names.js";
+import { JsonUtils } from "./../utils/json-utils.js";
 
 /**
  * A URI with an associated language tag.
@@ -21,21 +27,8 @@ export class LocalizedUri {
     static parse(json: Record<string, unknown>): LocalizedUri {
         const localizedUri = new LocalizedUri();
 
-        const language = json[PropertyNames.Language];
-        if (typeof language !== "string") {
-            throw new Error(
-                `Missing required property '${PropertyNames.Language}'.`
-            );
-        }
-        localizedUri.language = language;
-
-        const url = json[PropertyNames.Url];
-        if (typeof url !== "string") {
-            throw new Error(
-                `Missing required property '${PropertyNames.Url}'.`
-            );
-        }
-        localizedUri.url = url;
+        localizedUri.language = JsonUtils.getRequiredString(json, PropertyNames.Language);
+        localizedUri.url = JsonUtils.getRequiredString(json, PropertyNames.Url);
 
         return localizedUri;
     }

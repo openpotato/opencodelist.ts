@@ -1,5 +1,11 @@
-import { Columns } from "./columns.js";
+/*---------------------------------------------------------
+ *  Copyright (c) STÜBER SYSTEMS GmbH. All rights reserved.
+ *  Licensed under the MIT License.
+ *---------------------------------------------------------*/
+
 import { PropertyNames } from "./../dictionaries/property-names.js";
+import { JsonUtils } from "./../utils/json-utils.js";
+import { Columns } from "./columns.js";
 import type { CodeListDocument } from "./../code-list-document.js";
 
 /**
@@ -43,24 +49,20 @@ export class Key {
     ): Key {
         const key = new Key(codeList);
 
-        const id = json[PropertyNames.Id];
-        if (typeof id !== "string") {
-            throw new Error(`Missing required property '${PropertyNames.Id}'.`);
-        }
-        key.id = id;
+        key.id = JsonUtils.getRequiredString(json, PropertyNames.Id);
 
-        const name = json[PropertyNames.Name];
-        if (typeof name === "string") {
+        const name = JsonUtils.getString(json, PropertyNames.Name);
+        if (name !== undefined) {
             key.name = name;
         }
 
-        const description = json[PropertyNames.Description];
-        if (typeof description === "string") {
+        const description = JsonUtils.getString(json, PropertyNames.Description);
+        if (description !== undefined) {
             key.description = description;
         }
 
-        const columnIds = json[PropertyNames.ColumnIds];
-        if (Array.isArray(columnIds)) {
+        const columnIds = JsonUtils.getArray(json, PropertyNames.ColumnIds);
+        if (columnIds !== undefined) {
             key.columns.parseAndAdd(columnIds);
         }
 

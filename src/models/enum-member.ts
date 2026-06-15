@@ -1,4 +1,10 @@
+/*---------------------------------------------------------
+ *  Copyright (c) STÜBER SYSTEMS GmbH. All rights reserved.
+ *  Licensed under the MIT License.
+ *---------------------------------------------------------*/
+
 import { PropertyNames } from "./../dictionaries/property-names.js";
+import { JsonUtils } from "./../utils/json-utils.js";
 
 /**
  * An enumeration member.
@@ -8,7 +14,7 @@ export class EnumMember {
     /**
      * A short description of the value.
      */
-    public description: string | null = null;
+    public description?: string;
 
     /**
      * The value.
@@ -21,16 +27,8 @@ export class EnumMember {
     static parse(json: Record<string, unknown>): EnumMember {
         const enumMember = new EnumMember();
 
-        const value = json[PropertyNames.Value];
-        if (typeof value !== "string") {
-            throw new Error(`Missing required property '${PropertyNames.Value}'.`);
-        }
-        enumMember.value = value;
-
-        const description = json[PropertyNames.Description];
-        if (typeof description === "string") {
-            enumMember.description = description;
-        }
+        enumMember.value = JsonUtils.getRequiredString(json, PropertyNames.Value);
+        enumMember.description = JsonUtils.getString(json, PropertyNames.Description) ?? undefined;
 
         return enumMember;
     }

@@ -1,6 +1,12 @@
-import { DocumentRef } from "./document-ref.js";
+/*---------------------------------------------------------
+ *  Copyright (c) STÜBER SYSTEMS GmbH. All rights reserved.
+ *  Licensed under the MIT License.
+ *---------------------------------------------------------*/
+
 import { PropertyNames } from "./../dictionaries/property-names.js";
 import { TypeConsts } from "./../dictionaries/type-consts.js";
+import { JsonUtils } from "./../utils/json-utils.js";
+import { DocumentRef } from "./document-ref.js";
 
 /**
  * An external code list reference.
@@ -13,27 +19,12 @@ export class CodeListDocumentRef extends DocumentRef {
     static parse(json: Record<string, unknown>): CodeListDocumentRef {
         const documentRef = new CodeListDocumentRef();
 
-        const canonicalUri = json[PropertyNames.CanonicalUri];
-        if (typeof canonicalUri !== "string") {
-            throw new Error(
-                `Missing required property '${PropertyNames.CanonicalUri}'.`
-            );
-        }
-        documentRef.canonicalUri = canonicalUri;
+        documentRef.canonicalUri = JsonUtils.getRequiredString(json, PropertyNames.CanonicalUri);
+        documentRef.canonicalVersionUri = JsonUtils.getString(json, PropertyNames.CanonicalVersionUri) ?? undefined;
 
-        const canonicalVersionUri =
-            json[PropertyNames.CanonicalVersionUri];
-        if (typeof canonicalVersionUri === "string") {
-            documentRef.canonicalVersionUri = canonicalVersionUri;
-        }
-
-        const locationUrls = json[PropertyNames.LocationUrls];
-        if (Array.isArray(locationUrls)) {
-            for (const locationUrl of locationUrls) {
-                if (typeof locationUrl === "string") {
-                    documentRef.locationUrls.push(locationUrl);
-                }
-            }
+        const locationUrls = JsonUtils.getStringArray(json, PropertyNames.LocationUrls);
+        if (locationUrls !== undefined) {
+            documentRef.locationUrls.push(...locationUrls);
         }
 
         return documentRef;

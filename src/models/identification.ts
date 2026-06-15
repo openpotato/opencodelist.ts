@@ -1,7 +1,13 @@
+/*---------------------------------------------------------
+ *  Copyright (c) STÜBER SYSTEMS GmbH. All rights reserved.
+ *  Licensed under the MIT License.
+ *---------------------------------------------------------*/
+
+import { PropertyNames } from "./../dictionaries/property-names.js";
+import { JsonUtils } from "./../utils/json-utils.js";
 import { LocalizedUri } from "./localized-uri.js";
 import { MimeTypedUri } from "./mime-typed-uri.js";
 import { Publisher } from "./publisher.js";
-import { PropertyNames } from "./../dictionaries/property-names.js";
 
 /**
  * Meta information about a code list.
@@ -43,7 +49,7 @@ export class Identification {
     /**
      * Language tag according to BCP 47.
      */
-    public language: string | null = null;
+    public language?: string;
 
     /**
      * Suggested retrieval locations for this version,
@@ -54,17 +60,17 @@ export class Identification {
     /**
      * A human-readable name of the document.
      */
-    public longName: string | null = null;
+    public longName?: string;
 
     /**
      * Publication timestamp.
      */
-    public publishedAt: string | null = null;
+    public publishedAt?: string;
 
     /**
      * Information about the publisher.
      */
-    public publisher: Publisher | null = null;
+    public publisher?: Publisher;
 
     /**
      * A short identifier of the document.
@@ -74,17 +80,17 @@ export class Identification {
     /**
      * The timestamp from which this document is valid.
      */
-    public validFrom: string | null = null;
+    public validFrom?: string;
 
     /**
      * The timestamp until which this document is valid.
      */
-    public validTo: string | null = null;
+    public validTo?: string;
 
     /**
      * The version of the document.
      */
-    public version: string | null = null;
+    public version?: string;
 
     /**
      * Parses a JSON object into an Identification instance.
@@ -92,133 +98,54 @@ export class Identification {
     static parse(json: Record<string, unknown>): Identification {
         const identification = new Identification();
 
-        const shortName = json[PropertyNames.ShortName];
-        if (typeof shortName !== "string") {
-            throw new Error(
-                `Missing required property '${PropertyNames.ShortName}'.`
-            );
-        }
-        identification.shortName = shortName;
+        identification.shortName = JsonUtils.getRequiredString(json, PropertyNames.ShortName);
+        identification.longName = JsonUtils.getString(json, PropertyNames.LongName) ?? undefined;
+        identification.version = JsonUtils.getString(json, PropertyNames.Version) ?? undefined;
+        identification.publishedAt = JsonUtils.getString(json, PropertyNames.PublishedAt) ?? undefined;
+        identification.validFrom = JsonUtils.getString(json, PropertyNames.ValidFrom) ?? undefined;
+        identification.validTo = JsonUtils.getString(json, PropertyNames.ValidTo) ?? undefined;
+        identification.canonicalUri = JsonUtils.getRequiredString(json, PropertyNames.CanonicalUri);
+        identification.canonicalVersionUri = JsonUtils.getRequiredString(json, PropertyNames.CanonicalVersionUri);
+        identification.language = JsonUtils.getString(json, PropertyNames.Language) ?? undefined;
 
-        const longName = json[PropertyNames.LongName];
-        if (typeof longName === "string") {
-            identification.longName = longName;
-        }
-
-        const tags = json[PropertyNames.Tags];
-        if (Array.isArray(tags)) {
-            for (const tag of tags) {
-                if (typeof tag === "string") {
-                    identification.tags.push(tag);
-                }
-            }
+        const tags = JsonUtils.getStringArray(json, PropertyNames.Tags);
+        if (tags !== undefined) {
+            identification.tags.push(...tags);
         }
 
-        const version = json[PropertyNames.Version];
-        if (typeof version === "string") {
-            identification.version = version;
+        const changeLog = JsonUtils.getStringArray(json, PropertyNames.ChangeLog);
+        if (changeLog !== undefined) {
+            identification.changeLog.push(...changeLog);
         }
 
-        const changeLog = json[PropertyNames.ChangeLog];
-        if (Array.isArray(changeLog)) {
-            for (const entry of changeLog) {
-                if (typeof entry === "string") {
-                    identification.changeLog.push(entry);
-                }
-            }
+
+        const publisher = JsonUtils.getObject(json, PropertyNames.Publisher);
+        if (publisher !== undefined) {
+            identification.publisher = Publisher.parse(publisher);
         }
 
-        const publishedAt = json[PropertyNames.PublishedAt];
-        if (typeof publishedAt === "string") {
-            identification.publishedAt = publishedAt;
+
+        const locationUrls = JsonUtils.getStringArray(json, PropertyNames.LocationUrls);
+        if (locationUrls !== undefined) {
+            identification.locationUrls.push(...locationUrls);
         }
 
-        const publisher = json[PropertyNames.Publisher];
-        if (
-            publisher != null &&
-            typeof publisher === "object" &&
-            !Array.isArray(publisher)
-        ) {
-            identification.publisher = Publisher.parse(
-                publisher as Record<string, unknown>
-            );
+        const alternateLanguageLocations = JsonUtils.getObjectArray(
+            json,
+            PropertyNames.AlternateLanguageLocations,
+            LocalizedUri.parse,
+        );
+        if (alternateLanguageLocations !== undefined) {
+            identification.alternateLanguageLocations.push(...alternateLanguageLocations);
         }
 
-        const validFrom = json[PropertyNames.ValidFrom];
-        if (typeof validFrom === "string") {
-            identification.validFrom = validFrom;
-        }
-
-        const validTo = json[PropertyNames.ValidTo];
-        if (typeof validTo === "string") {
-            identification.validTo = validTo;
-        }
-
-        const canonicalUri = json[PropertyNames.CanonicalUri];
-        if (typeof canonicalUri !== "string") {
-            throw new Error(
-                `Missing required property '${PropertyNames.CanonicalUri}'.`
-            );
-        }
-        identification.canonicalUri = canonicalUri;
-
-        const canonicalVersionUri =
-            json[PropertyNames.CanonicalVersionUri];
-        if (typeof canonicalVersionUri !== "string") {
-            throw new Error(
-                `Missing required property '${PropertyNames.CanonicalVersionUri}'.`
-            );
-        }
-        identification.canonicalVersionUri = canonicalVersionUri;
-
-        const locationUrls = json[PropertyNames.LocationUrls];
-        if (Array.isArray(locationUrls)) {
-            for (const url of locationUrls) {
-                if (typeof url === "string") {
-                    identification.locationUrls.push(url);
-                }
-            }
-        }
-
-        const alternateLanguageLocations =
-            json[PropertyNames.AlternateLanguageLocations];
-        if (Array.isArray(alternateLanguageLocations)) {
-            for (const item of alternateLanguageLocations) {
-                if (
-                    item != null &&
-                    typeof item === "object" &&
-                    !Array.isArray(item)
-                ) {
-                    identification.alternateLanguageLocations.push(
-                        LocalizedUri.parse(
-                            item as Record<string, unknown>
-                        )
-                    );
-                }
-            }
-        }
-
-        const alternateFormatLocations =
-            json[PropertyNames.AlternateFormatLocations];
-        if (Array.isArray(alternateFormatLocations)) {
-            for (const item of alternateFormatLocations) {
-                if (
-                    item != null &&
-                    typeof item === "object" &&
-                    !Array.isArray(item)
-                ) {
-                    identification.alternateFormatLocations.push(
-                        MimeTypedUri.parse(
-                            item as Record<string, unknown>
-                        )
-                    );
-                }
-            }
-        }
-
-        const language = json[PropertyNames.Language];
-        if (typeof language === "string") {
-            identification.language = language;
+        const alternateFormatLocations = JsonUtils.getObjectArray(
+            json,
+            PropertyNames.AlternateFormatLocations,
+            MimeTypedUri.parse,
+        );
+        if (alternateFormatLocations !== undefined) {
+            identification.alternateFormatLocations.push(...alternateFormatLocations);
         }
 
         return identification;
