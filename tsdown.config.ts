@@ -1,11 +1,11 @@
-import { defineConfig } from "tsup";
+import { defineConfig } from "tsdown";
 
 export default defineConfig([
     {
         entry: ["src/index.ts"],
         format: ["esm", "cjs"],
         sourcemap: true,
-        splitting: false,
+        fixedExtension: false,
         clean: true,
         target: "es2022",
         dts: {
@@ -19,7 +19,7 @@ export default defineConfig([
         format: ["esm", "cjs"],
         outDir: "dist/models",
         sourcemap: true,
-        splitting: false,
+        fixedExtension: false,
         clean: false,
         target: "es2022",
         dts: {
@@ -33,7 +33,7 @@ export default defineConfig([
         format: ["esm", "cjs"],
         outDir: "dist/dictionaries",
         sourcemap: true,
-        splitting: false,
+        fixedExtension: false,
         clean: false,
         target: "es2022",
         dts: {

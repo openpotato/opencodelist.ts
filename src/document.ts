@@ -3,9 +3,9 @@
  *  Licensed under the MIT License.
  *---------------------------------------------------------*/
 
+import { SemVer } from "semver";
 import { Annotation } from "./models/annotation.js";
 import { Identification } from "./models/identification.js";
-import { SemanticVersion } from "./utils/semantic-version.js";
 
 /**
  * The OpenCodeList version supported by this library.
@@ -33,8 +33,8 @@ export interface SerializeOptions {
  * CodeListSetDocument.
  */
 export abstract class Document {
-    private static readonly implementedVersion = new SemanticVersion(0, 3, 0);
-    private static readonly minimumCompatibleVersion = new SemanticVersion(0, 3, 0);
+    private static readonly implementedVersion = new SemVer("0.3.0");
+    private static readonly minimumCompatibleVersion = new SemVer("0.3.0");
 
     /**
      * Creates a new instance of the Document class.
@@ -81,7 +81,7 @@ export abstract class Document {
      * 
      * @returns An OpenCodeList version
      */
-    public static getImplementedVersion(): SemanticVersion {
+    public static getImplementedVersion(): SemVer {
         return Document.implementedVersion;
     }
 
@@ -90,7 +90,7 @@ export abstract class Document {
      * 
      * @returns An OpenCodeList version
      */
-    public static getMinimumCompatibleVersion(): SemanticVersion {
+    public static getMinimumCompatibleVersion(): SemVer {
         return Document.minimumCompatibleVersion;
     }
 

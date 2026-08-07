@@ -3,8 +3,8 @@
  *  Licensed under the MIT License.
  *---------------------------------------------------------*/
 
+import { gt, lt, valid } from "semver";
 import { PropertyNames } from "./dictionaries/property-names.js";
-import { SemanticVersion } from "./utils/semantic-version.js";
 import { Annotation } from "./models/annotation.js";
 import { Columns } from "./models/columns.js";
 import { ForeignKeys } from "./models/foreign-keys.js";
@@ -14,6 +14,7 @@ import { Keys } from "./models/keys.js";
 import { Rows } from "./models/rows.js";
 import { CodeListParserError } from "./code-list-parser-error.js";
 import { Document } from "./document.js";
+import { JsonUtils } from "./utils/json-utils.js";
 
 /**
  * A code list document according to the OpenCodeList specification.
@@ -62,21 +63,17 @@ export class CodeListDocument extends Document {
     static parse(root: Record<string, unknown>): CodeListDocument {
         const version = root[PropertyNames.OpenCodeList];
 
-        if (typeof version !== "string") {
-            throw new CodeListParserError(
-                `JSON Property "${PropertyNames.OpenCodeList}" missing.`
-            );
-        }
-
+        const openCodeListVersion = JsonUtils.getRequiredString(root, PropertyNames.OpenCodeList);
+        
         if (
-            SemanticVersion.from(version).compareTo(
-                Document.getMinimumCompatibleVersion()
-            ) < 0
+            valid(openCodeListVersion) == null ||
+            lt(openCodeListVersion, Document.getMinimumCompatibleVersion()) ||
+            gt(openCodeListVersion, Document.getImplementedVersion())
         ) {
             throw new CodeListParserError(
-                `Version ${version} of OpenCodeList not supported.`
+                `Unsupported OpenCodeList version '${openCodeListVersion}'.`
             );
-        }
+        }        
 
         const codeList = root[PropertyNames.CodeList];
 

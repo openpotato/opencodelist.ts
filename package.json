@@ -1,6 +1,6 @@
 {
   "name": "opencodelist-ts",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "A TypeScript library for parsing and building OpenCodeList documents",
   "type": "module",
   "sideEffects": false,
@@ -29,7 +29,7 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "tsup",
+    "build": "tsdown",
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run",
     "test:contract": "vitest run -c vitest.contract.config.ts",
@@ -49,13 +49,17 @@
     "node": ">=22"
   },
   "devDependencies": {
-    "@types/node": "^22.19.19",
-    "tsup": "^8.5.1",
+    "@types/node": "^22.20.1",
+    "@types/semver": "^7.8.0",
+    "tsdown": "^0.22.14",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.9"
+    "vitest": "^4.1.10"
   },
   "keywords": [
     "typescript",
     "opencodelist"
-  ]
+  ],
+  "dependencies": {
+    "semver": "^7.8.5"
+  }
 }

@@ -3,8 +3,9 @@
  *  Licensed under the MIT License.
  *---------------------------------------------------------*/
 
+import { valid, lt, gt } from "semver";
+import { JsonUtils } from "./utils/json-utils.js";
 import { PropertyNames } from "./dictionaries/property-names.js";
-import { SemanticVersion } from "./utils/semantic-version.js";
 import { CodeListDocument } from "./code-list-document.js";
 import { CodeListParserError } from "./code-list-parser-error.js";
 import { CodeListSetDocument } from "./code-list-set-document.js";
@@ -15,18 +16,17 @@ import { Document } from "./document.js";
  */
 export class DocumentLoader {
     private static validateRoot(root: Record<string, unknown>): void {
-        const version = root[PropertyNames.OpenCodeList];
-        if (typeof version !== "string") {
+        const openCodeListVersion = JsonUtils.getRequiredString(root, PropertyNames.OpenCodeList);
+        
+        if (
+            valid(openCodeListVersion) == null ||
+            lt(openCodeListVersion, Document.getMinimumCompatibleVersion()) ||
+            gt(openCodeListVersion, Document.getImplementedVersion())
+        ) {
             throw new CodeListParserError(
-                `JSON Property "${PropertyNames.OpenCodeList}" missing.`
+                `Unsupported OpenCodeList version '${openCodeListVersion}'.`
             );
-        }
-
-        if (SemanticVersion.from(version).compareTo(Document.getMinimumCompatibleVersion()) < 0) {
-            throw new CodeListParserError(
-                `Version ${version} of OpenCodeList not supported.`
-            );
-        }
+        }        
     }
 
     /**

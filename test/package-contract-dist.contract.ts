@@ -10,7 +10,6 @@ describe("Package contract (dist)", () => {
         expect(pkg.DocumentLoader).toBeDefined();
         expect(pkg.CodeListParserError).toBeDefined();
         expect(pkg.Document).toBeDefined();
-        expect(pkg.SemanticVersion).toBeDefined();
     });
 
     it("loads models and dictionaries subpath outputs", async () => {

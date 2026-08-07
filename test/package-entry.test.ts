@@ -6,7 +6,6 @@ import {
     CodeListParserError,
     Document,
     DocumentLoader,
-    SemanticVersion,
 } from "../src/index.js";
 
 describe("Package entry exports", () => {
@@ -16,6 +15,5 @@ describe("Package entry exports", () => {
         expect(CodeListParserError).toBeDefined();
         expect(DocumentLoader).toBeDefined();
         expect(Document).toBeDefined();
-        expect(SemanticVersion).toBeDefined();
     });
 });

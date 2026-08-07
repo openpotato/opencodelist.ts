@@ -3,8 +3,9 @@
  *  Licensed under the MIT License.
  *---------------------------------------------------------*/
 
+import { valid, lt, gt } from "semver";
 import { PropertyNames } from "./dictionaries/property-names.js";
-import { SemanticVersion } from "./utils/semantic-version.js";
+import { JsonUtils } from "./utils/json-utils.js";
 import { Annotation } from "./models/annotation.js";
 import { DocumentRefs } from "./models/document-refs.js";
 import { Identification } from "./models/identification.js";
@@ -35,21 +36,17 @@ export class CodeListSetDocument extends Document {
     static parse(root: Record<string, unknown>): CodeListSetDocument {
         const version = root[PropertyNames.OpenCodeList];
 
-        if (typeof version !== "string") {
-            throw new CodeListParserError(
-                `JSON Property "${PropertyNames.OpenCodeList}" missing.`
-            );
-        }
+        const openCodeListVersion = JsonUtils.getRequiredString(root, PropertyNames.OpenCodeList);
 
         if (
-            SemanticVersion.from(version).compareTo(
-                Document.getMinimumCompatibleVersion()
-            ) < 0
+            valid(openCodeListVersion) == null ||
+            lt(openCodeListVersion, Document.getMinimumCompatibleVersion()) ||
+            gt(openCodeListVersion, Document.getImplementedVersion())
         ) {
             throw new CodeListParserError(
-                `Version ${version} of OpenCodeList not supported.`
+                `Unsupported OpenCodeList version '${openCodeListVersion}'.`
             );
-        }
+        }        
 
         const codeListSet = root[PropertyNames.CodeListSet];
 
