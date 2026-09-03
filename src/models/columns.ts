@@ -6,7 +6,6 @@
 import { PropertyNames } from "./../dictionaries/property-names.js";
 import { TypeConsts } from "./../dictionaries/type-consts.js";
 import { BooleanColumn } from "./boolean-column.js";
-import { CodeListParserError } from "./../code-list-parser-error.js";
 import { Column } from "./column.js";
 import { DateOnlyColumn } from "./date-only-column.js";
 import { DateTimeColumn } from "./date-time-column.js";
@@ -17,16 +16,23 @@ import { JsonColumn } from "./json-column.js";
 import { NumberColumn } from "./number-column.js";
 import { StringColumn } from "./string-column.js";
 import { TimeOnlyColumn } from "./time-only-column.js";
-import type { CodeListDocument } from "./../code-list-document.js";
+import { CodeListParserError } from "./../code-list-parser-error.js";
+import { CodeListDocument } from "./../code-list-document.js";
+
 
 /**
  * The column definitions of a code list.
  */
 export class Columns implements Iterable<Column> {
+    /**
+     * The column instances.
+     */
     private readonly columns: Column[] = [];
 
     /**
      * Creates a new instance of the Columns class.
+     *
+     * @returns The new instance.
      */
     constructor(private readonly document: CodeListDocument) { }
 
@@ -39,6 +45,9 @@ export class Columns implements Iterable<Column> {
 
     /**
      * Gets a column by index.
+     *
+     * @param index - The index value.
+     * @returns The operation result.
      */
     getAt(index: number): Column {
         return this.columns[index]!;
@@ -46,6 +55,10 @@ export class Columns implements Iterable<Column> {
 
     /**
      * Sets a column by index.
+     *
+     * @param index - The index value.
+     * @param column - The column instance.
+     * @returns No return value.
      */
     setAt(index: number, column: Column): void {
         this.columns[index] = column;
@@ -53,6 +66,9 @@ export class Columns implements Iterable<Column> {
 
     /**
      * Gets a column by ID.
+     *
+     * @param columnId - The columnId value.
+     * @returns The operation result.
      */
     getById(columnId: string): Column {
         const column = this.findOrDefault((x) => x.id === columnId);
@@ -66,9 +82,13 @@ export class Columns implements Iterable<Column> {
 
     /**
      * Sets a column by ID.
+     *
+     * @param columnId - The columnId value.
+     * @param column - The column instance.
+     * @returns No return value.
      */
     setById(columnId: string, column: Column): void {
-        const index = this.indexOf((x) => x.id === columnId);
+        const index = this.findIndex((x) => x.id === columnId);
 
         if (index === -1) {
             throw new Error(`Column with ID "${columnId}" not found`);
@@ -79,6 +99,9 @@ export class Columns implements Iterable<Column> {
 
     /**
      * Adds a column to the internal column collection.
+     *
+     * @param column - The column instance.
+     * @returns The column instance.
      */
     add<T extends Column>(column: T): T {
         this.columns.push(column);
@@ -87,6 +110,8 @@ export class Columns implements Iterable<Column> {
 
     /**
      * Removes all columns from the internal column collection.
+     *
+     * @returns No return value.
      */
     clear(): void {
         this.document.keys.clear();
@@ -96,14 +121,10 @@ export class Columns implements Iterable<Column> {
     }
 
     /**
-     * Does a certain column exist?
-     */
-    contains(predicate: (column: Column) => boolean): boolean {
-        return this.columns.some(predicate);
-    }
-
-    /**
      * Finds a certain column.
+     *
+     * @param predicate - The predicate value.
+     * @returns The operation result.
      */
     findOrDefault(predicate: (column: Column) => boolean): Column | null {
         return this.columns.find(predicate) ?? null;
@@ -111,14 +132,19 @@ export class Columns implements Iterable<Column> {
 
     /**
      * Index of a certain column.
+     *
+     * @param predicate - The predicate value.
+     * @returns The operation result.
      */
-    indexOf(predicate: (column: Column) => boolean): number {
+    findIndex(predicate: (column: Column) => boolean): number {
         return this.columns.findIndex(predicate);
     }
 
     /**
-     * Removes a column and all bound keys and foreign keys.
-     * Also removes all values bound to this column.
+     * Removes a column and all bound keys and foreign keys. Also removes all values bound to this column.
+     *
+     * @param column - The column value.
+     * @returns No return value.
      */
     remove(column: Column): void {
         if (this.document.rows.count !== 0) {
@@ -135,20 +161,25 @@ export class Columns implements Iterable<Column> {
     }
 
     /**
-     * Tries to find a column.
+     * Does any column match the given predicate?
+     *
+     * @param predicate - The predicate value.
+     * @returns The operation result.
      */
-    tryFind(predicate: (column: Column) => boolean): Column | null {
-        return this.findOrDefault(predicate);
+    some(predicate: (column: Column) => boolean): boolean {
+        return this.columns.some(predicate);
     }
 
     /**
-     * Parses a JSON array into new Column instances
-     * and adds them to the internal collection.
+     * Parses a JSON array into new Column instances and adds them to the internal collection.
+     *
+     * @param json - The json value.
+     * @returns No return value.
      */
     parseAndAdd(json: unknown[]): void {
         for (const item of json) {
             if (typeof item === "string") {
-                const column = this.document.columns.tryFind((x) => x.id === item);
+                const column = this.document.columns.findOrDefault((x) => x.id === item);
 
                 if (column == null) {
                     throw new CodeListParserError(`Column Id "${item}" not found.`);
@@ -160,10 +191,19 @@ export class Columns implements Iterable<Column> {
 
             if (item != null && typeof item === "object" && !Array.isArray(item)) {
                 this.parseColumnDefinition(item as Record<string, unknown>);
+                continue;
             }
+
+            throw new CodeListParserError("Column definition must be an object or a column ID string.");
         }
     }
 
+    /**
+     * Parses a column definition from a JSON object and adds it to the internal collection.
+     *
+     * @param json - The json value.
+     * @returns No return value.
+     */
     private parseColumnDefinition(json: Record<string, unknown>): void {
         const type = json[PropertyNames.Type];
 
@@ -175,7 +215,7 @@ export class Columns implements Iterable<Column> {
             case TypeConsts.String:
                 this.columns.push(StringColumn.parse(json));
                 break;
-
+            
             case TypeConsts.Number:
                 this.columns.push(NumberColumn.parse(json));
                 break;
@@ -217,6 +257,11 @@ export class Columns implements Iterable<Column> {
         }
     }
 
+    /**
+     * Allows iteration over the columns in the internal column collection.
+     * 
+     * @returns An iterator over the columns.
+     */
     [Symbol.iterator](): Iterator<Column> {
         return this.columns[Symbol.iterator]();
     }

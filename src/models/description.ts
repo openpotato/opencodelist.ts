@@ -22,25 +22,30 @@ export class Description {
     public format!: string;
 
     /**
-     * Optional language tag according to https://www.rfc-editor.org/rfc/bcp/bcp47.txt to specify the language of the comment.        
+     * Optional language tag according to https://www.rfc-editor.org/rfc/bcp/bcp47.txt to specify the language of the comment.
      */
     public language: string | null = null;
 
     /**
      * Parses a JSON object into a Description instance.
+     *
+     * @param json - The JSON object instance.
+     * @returns The parsed instance.
      */
     static parse(json: Record<string, unknown>): Description {
         const description = new Description();
 
         description.format = JsonUtils.getRequiredString(json, PropertyNames.Format);
         description.content = JsonUtils.getRequiredString(json, PropertyNames.Content);
-        description.language = JsonUtils.getString(json, PropertyNames.Language) ?? null;
+        description.language = JsonUtils.getLanguageTag(json, PropertyNames.Language) ?? null;
 
         return description;
     }
 
     /**
-     * Converts this instance to a JSON object.
+     * Serializes this instance to a JSON object.
+     *
+     * @returns The JSON representation.
      */
     toJSON(): Record<string, unknown> {
         const json: Record<string, unknown> = {

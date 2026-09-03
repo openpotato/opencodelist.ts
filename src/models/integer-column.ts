@@ -24,16 +24,13 @@ export class IntegerColumn extends Column {
     public minValue?: number;
 
     /**
-     * Parses a JSON object into an IntegerColumn instance.
+     * Parses a JSON object into a IntegerColumn instance.
+     *
+     * @param json - The JSON object instance.
+     * @returns The parsed instance.
      */
     static parse(json: Record<string, unknown>): IntegerColumn {
-        const column = new IntegerColumn();
-
-        column.id = JsonUtils.getRequiredString(json, PropertyNames.Id);
-        column.name = JsonUtils.getRequiredString(json, PropertyNames.Name);
-        column.description = JsonUtils.getString(json, PropertyNames.Description) ?? undefined;
-        column.nullable = JsonUtils.getBoolean(json, PropertyNames.Nullable) ?? undefined;
-        column.optional = JsonUtils.getBoolean(json, PropertyNames.Optional) ?? undefined;
+        const column = Column.parseCommonProperties(new IntegerColumn(), json);
         column.minValue = JsonUtils.getInteger(json, PropertyNames.MinValue) ?? undefined;
         column.maxValue = JsonUtils.getInteger(json, PropertyNames.MaxValue) ?? undefined;
 
@@ -41,7 +38,9 @@ export class IntegerColumn extends Column {
     }
 
     /**
-     * Converts this instance to a JSON object.
+     * Serializes this instance to a JSON object.
+     *
+     * @returns The JSON representation.
      */
     override toJSON(): Record<string, unknown> {
         const json: Record<string, unknown> = {

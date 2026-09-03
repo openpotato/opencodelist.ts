@@ -8,6 +8,7 @@ import { JsonUtils } from "./../utils/json-utils.js";
 import { Columns } from "./columns.js";
 import { KeyRef } from "./key-ref.js";
 import { CodeListDocument } from "./../code-list-document.js";
+import type { LocalizableString } from "./localizable-string.js";
 
 /**
  * A foreign key definition.
@@ -16,6 +17,9 @@ export class ForeignKey {
 
     /**
      * Creates a new foreign key.
+     *
+     * @param document - The document value.
+     * @returns The new instance.
      */
     constructor(document: CodeListDocument) {
         this.columns = new Columns(document);
@@ -30,7 +34,7 @@ export class ForeignKey {
     /**
      * A short description of the foreign key.
      */
-    public description?: string;
+    public description?: LocalizableString;
 
     /**
      * The ID of the foreign key.
@@ -40,7 +44,7 @@ export class ForeignKey {
     /**
      * The name of the foreign key.
      */
-    public name?: string;
+    public name?: LocalizableString;
 
     /**
      * A reference to a key in another code list.
@@ -49,25 +53,30 @@ export class ForeignKey {
 
     /**
      * Parses a JSON object into a ForeignKey instance.
+     *
+     * @param json - The JSON object instance.
+     * @param codeList - The CodeListDocument instance.
+     * @returns The parsed instance.
      */
     static parse(json: Record<string, unknown>, codeList: CodeListDocument): ForeignKey {
         const foreignKey = new ForeignKey(codeList);
 
         foreignKey.id = JsonUtils.getRequiredString(json, PropertyNames.Id);
-        foreignKey.name = JsonUtils.getString(json, PropertyNames.Name) ?? undefined;
-        foreignKey.description = JsonUtils.getString(json, PropertyNames.Description) ?? undefined;
+        foreignKey.name = JsonUtils.getLocalizableString(json, PropertyNames.Name) ?? undefined;
+        foreignKey.description = JsonUtils.getLocalizableString(json, PropertyNames.Description) ?? undefined;
         foreignKey.keyRef = KeyRef.parse(JsonUtils.getRequiredObject(json, PropertyNames.KeyRef));
 
-        const columnIds = JsonUtils.getArray(json, PropertyNames.ColumnIds);
-        if (columnIds !== undefined) {
-            foreignKey.columns.parseAndAdd(columnIds);
-        }
+        foreignKey.columns.parseAndAdd(
+            JsonUtils.getRequiredArray(json, PropertyNames.ColumnIds)
+        );
 
         return foreignKey;
     }
 
     /**
-     * Converts this instance to a JSON object.
+     * Serializes this instance to a JSON object.
+     *
+     * @returns The JSON representation.
      */
     toJSON(): Record<string, unknown> {
         const json: Record<string, unknown> = {};

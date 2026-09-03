@@ -10,8 +10,9 @@ export class CodeListParserError extends Error {
 
     /**
      * Creates a new instance of the CodeListParserError class.
-     * 
-     * @param message The error message describing the parsing error.
+     *
+     * @param message - The message value.
+     * @returns The new instance.
      */
     constructor(message: string) {
         super(message);

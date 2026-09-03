@@ -4,12 +4,20 @@
  *---------------------------------------------------------*/
 
 import { CodeListParserError } from "../code-list-parser-error.js";
+import type { LocalizableString } from "../models/localizable-string.js";
 
 /**
  * Utility class for JSON operations.
  */
 export class JsonUtils {
 
+    /**
+     * Executes the operation and returns a result.
+     *
+     * @param json - The json value.
+     * @param propertyName - The propertyName value.
+     * @returns The operation result.
+     */
     static getString(json: Record<string, unknown>, propertyName: string): string | undefined {
 
         const value = json[propertyName];
@@ -27,6 +35,13 @@ export class JsonUtils {
         );
     }
 
+    /**
+     * Executes the operation and returns a result.
+     *
+     * @param json - The json value.
+     * @param propertyName - The propertyName value.
+     * @returns The operation result.
+     */
     static getRequiredString(json: Record<string, unknown>, propertyName: string): string {
 
         const value = JsonUtils.getString(json, propertyName);
@@ -40,6 +55,117 @@ export class JsonUtils {
         );
     }
 
+
+    /**
+     * Executes the operation and returns a result.
+     *
+     * @param json - The json value.
+     * @param propertyName - The propertyName value.
+     * @returns The operation result.
+     */
+    static getLanguageTag(json: Record<string, unknown>, propertyName: string): string | undefined {
+        const value = JsonUtils.getString(json, propertyName);
+        if (value === undefined) {
+            return undefined;
+        }
+
+        return value;
+    }
+
+    /**
+     * Executes the operation and returns a result.
+     *
+     * @param json - The json value.
+     * @param propertyName - The propertyName value.
+     * @returns The operation result.
+     */
+    static getRequiredLanguageTag(json: Record<string, unknown>, propertyName: string): string {
+        const value = JsonUtils.getLanguageTag(json, propertyName);
+        if (value !== undefined) {
+            return value;
+        }
+
+        throw new CodeListParserError(
+            `Missing required property '${propertyName}'.`
+        );
+    }
+
+    /**
+     * Executes the operation and returns a result.
+     *
+     * @param json - The json value.
+     * @param propertyName - The propertyName value.
+     * @returns The operation result.
+     */
+    static getLocalizableString(json: Record<string, unknown>, propertyName: string): LocalizableString | undefined {
+        const value = json[propertyName];
+        if (value === undefined) {
+            return undefined;
+        }
+
+        return JsonUtils.asLocalizableString(value, `Property '${propertyName}'`);
+    }
+
+    /**
+     * Executes the operation and returns a result.
+     *
+     * @param json - The json value.
+     * @param propertyName - The propertyName value.
+     * @returns The operation result.
+     */
+    static getRequiredLocalizableString(json: Record<string, unknown>, propertyName: string): LocalizableString {
+        const value = JsonUtils.getLocalizableString(json, propertyName);
+        if (value !== undefined) {
+            return value;
+        }
+
+        throw new CodeListParserError(
+            `Missing required property '${propertyName}'.`
+        );
+    }
+
+    /**
+     * Executes the operation and returns a result.
+     *
+     * @param value - The value value.
+     * @returns The operation result.
+     */
+    static asLocalizableString(value: unknown, context = "Value"): LocalizableString {
+        if (typeof value === "string") {
+            return value;
+        }
+
+        if (value == null || typeof value !== "object" || Array.isArray(value)) {
+            throw new CodeListParserError(
+                `${context} must be a string or an object containing localized strings.`
+            );
+        }
+
+        const entries = Object.entries(value);
+        if (entries.length === 0) {
+            throw new CodeListParserError(
+                `${context} must contain at least one localized string.`
+            );
+        }
+
+        for (const [language, text] of entries) {
+            if (typeof text !== "string") {
+                throw new CodeListParserError(
+                    `${context} contains a localized value that is not a string.`
+                );
+            }
+        }
+
+        return { ...(value as Record<string, string>) };
+    }
+
+    /**
+     * Executes the operation and returns a result.
+     *
+     * @param json - The json value.
+     * @param propertyName - The propertyName value.
+     * @returns The operation result.
+     */
     static getBoolean(json: Record<string, unknown>, propertyName: string): boolean | undefined {
 
         const value = json[propertyName];
@@ -57,6 +183,13 @@ export class JsonUtils {
         );
     }
 
+    /**
+     * Executes the operation and returns a result.
+     *
+     * @param json - The json value.
+     * @param propertyName - The propertyName value.
+     * @returns The operation result.
+     */
     static getRequiredBoolean(json: Record<string, unknown>, propertyName: string): boolean {
 
         const value = JsonUtils.getBoolean(json, propertyName);
@@ -70,6 +203,13 @@ export class JsonUtils {
         );
     }
 
+    /**
+     * Executes the operation and returns a result.
+     *
+     * @param json - The json value.
+     * @param propertyName - The propertyName value.
+     * @returns The operation result.
+     */
     static getInteger(json: Record<string, unknown>, propertyName: string): number | undefined {
 
         const value = json[propertyName];
@@ -87,6 +227,13 @@ export class JsonUtils {
         );
     }
 
+    /**
+     * Executes the operation and returns a result.
+     *
+     * @param json - The json value.
+     * @param propertyName - The propertyName value.
+     * @returns The operation result.
+     */
     static getRequiredInteger(json: Record<string, unknown>, propertyName: string): number {
 
         const value = JsonUtils.getInteger(json, propertyName);
@@ -100,6 +247,13 @@ export class JsonUtils {
         );
     }
 
+    /**
+     * Executes the operation and returns a result.
+     *
+     * @param json - The json value.
+     * @param propertyName - The propertyName value.
+     * @returns The operation result.
+     */
     static getNumber(json: Record<string, unknown>, propertyName: string): number | undefined {
 
         const value = json[propertyName];
@@ -108,7 +262,7 @@ export class JsonUtils {
             return undefined;
         }
 
-        if (typeof value === "number") {
+        if (typeof value === "number" && Number.isFinite(value)) {
             return value;
         }
 
@@ -117,6 +271,13 @@ export class JsonUtils {
         );
     }
 
+    /**
+     * Executes the operation and returns a result.
+     *
+     * @param json - The json value.
+     * @param propertyName - The propertyName value.
+     * @returns The operation result.
+     */
     static getRequiredNumber(json: Record<string, unknown>, propertyName: string): number {
 
         const value = JsonUtils.getNumber(json, propertyName);
@@ -130,17 +291,37 @@ export class JsonUtils {
         );
     }
 
+    /**
+     * Executes the operation and returns a result.
+     *
+     * @param json - The json value.
+     * @param propertyName - The propertyName value.
+     * @returns The operation result.
+     */
     static getObject(json: Record<string, unknown>, propertyName: string): Record<string, unknown> | undefined {
 
         const value = json[propertyName];
+
+        if (value === undefined) {
+            return undefined;
+        }
 
         if (value != null && typeof value === "object" && !Array.isArray(value)) {
             return value as Record<string, unknown>;
         }
 
-        return undefined;
+        throw new CodeListParserError(
+            `Property '${propertyName}' must be an object.`
+        );
     }
 
+    /**
+     * Executes the operation and returns a result.
+     *
+     * @param json - The json value.
+     * @param propertyName - The propertyName value.
+     * @returns The operation result.
+     */
     static getRequiredObject(json: Record<string, unknown>, propertyName: string): Record<string, unknown> {
 
         const value = JsonUtils.getObject(json, propertyName);
@@ -154,6 +335,13 @@ export class JsonUtils {
         );
     }
 
+    /**
+     * Executes the operation and returns a result.
+     *
+     * @param json - The json value.
+     * @param propertyName - The propertyName value.
+     * @returns The operation result.
+     */
     static getArray(json: Record<string, unknown>, propertyName: string): unknown[] | undefined {
 
         const value = json[propertyName];
@@ -171,6 +359,13 @@ export class JsonUtils {
         return value;
     }
 
+    /**
+     * Executes the operation and returns a result.
+     *
+     * @param json - The json value.
+     * @param propertyName - The propertyName value.
+     * @returns The operation result.
+     */
     static getRequiredArray(
         json: Record<string, unknown>,
         propertyName: string,
@@ -187,6 +382,13 @@ export class JsonUtils {
         );
     }
 
+    /**
+     * Executes the operation and returns a result.
+     *
+     * @param json - The json value.
+     * @param propertyName - The propertyName value.
+     * @returns The operation result.
+     */
     static getStringArray(json: Record<string, unknown>, propertyName: string): string[] | undefined {
 
         const value = JsonUtils.getArray(json, propertyName);
@@ -206,6 +408,13 @@ export class JsonUtils {
         });
     }
 
+    /**
+     * Executes the operation and returns a result.
+     *
+     * @param json - The json value.
+     * @param propertyName - The propertyName value.
+     * @returns The operation result.
+     */
     static getRequiredStringArray(json: Record<string, unknown>, propertyName: string): string[] {
 
         const value = JsonUtils.getStringArray(json, propertyName);

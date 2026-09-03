@@ -26,27 +26,25 @@ export class EnumColumn extends Column {
 
     /**
      * Parses a JSON object into an EnumColumn instance.
+     *
+     * @param json - The JSON object instance.
+     * @returns The parsed instance.
      */
     static parse(json: Record<string, unknown>): EnumColumn {
-        const column = new EnumColumn();
+        const column = Column.parseCommonProperties(new EnumColumn(), json);
+        column.language = JsonUtils.getLanguageTag(json, PropertyNames.Language) ?? undefined;
 
-        column.id = JsonUtils.getRequiredString(json, PropertyNames.Id);
-        column.name = JsonUtils.getRequiredString(json, PropertyNames.Name);
-        column.description = JsonUtils.getString(json, PropertyNames.Description) ?? undefined;
-        column.nullable = JsonUtils.getBoolean(json, PropertyNames.Nullable) ?? undefined;
-        column.optional = JsonUtils.getBoolean(json, PropertyNames.Optional) ?? undefined;
-        column.language = JsonUtils.getString(json, PropertyNames.Language) ?? undefined;
-
-        const members = JsonUtils.getObjectArray(json, PropertyNames.Members, (member) => EnumMember.parse(member));
-        if (members !== undefined) {
-            column.members.push(...members);
-        }
+        column.members.push(
+            ...JsonUtils.getRequiredObjectArray(json, PropertyNames.Members, EnumMember.parse)
+        );
 
         return column;
     }
 
     /**
-     * Converts this instance to a JSON object.
+     * Serializes this instance to a JSON object.
+     *
+     * @returns The JSON representation.
      */
     override toJSON(): Record<string, unknown> {
         const json: Record<string, unknown> = {

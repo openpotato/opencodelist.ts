@@ -1,5 +1,5 @@
 {
-  "$opencodelist": "0.3.0",
+  "$opencodelist": "0.4.0",
   "$comments": [
     "This is a comment."
   ],
@@ -82,6 +82,24 @@
           "type": "string"
         },
         {
+          "id": "longName",
+          "name": "Long Name",
+          "type": "string",
+          "language": "en"
+        },
+        {
+          "id": "multiLangName",
+          "name": {
+              "de": "Kürzel",
+              "en": "Name"
+          },
+          "description": {
+              "de": "Bezeichnung des Landes",
+              "en": "Name of the country"
+          },
+          "type": "string"
+        },        
+        {
           "id": "integer",
           "name": "Integer",
           "type": "integer"
@@ -106,7 +124,10 @@
             },
             {
               "value": "e3",
-              "description": "e3 value"
+              "description": {
+                "de": "e3 Wert",
+                "en": "e3 value"
+              }
             }
           ]
         },
@@ -153,7 +174,7 @@
           "id": "json",
           "name": "Embedded JSON",
           "type": "document",
-          "schema": "https://json.schemastore.org/github-action.json"
+          "schemaUri": "https://json.schemastore.org/github-action.json"
         }
       ],
       "keys": [

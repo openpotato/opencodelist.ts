@@ -7,8 +7,6 @@ import { PropertyNames } from "./../dictionaries/property-names.js";
 import { TypeConsts } from "./../dictionaries/type-consts.js";
 import { JsonUtils } from "../utils/json-utils.js";
 import { Column } from "./column.js";
-import { JsonColumnSchemaLocation } from "./json-column-schema-location.js";
-import { CodeListParserError } from "./../code-list-parser-error.js";
 
 /**
  * This is a column representing an embedded JSON object or array.
@@ -16,56 +14,28 @@ import { CodeListParserError } from "./../code-list-parser-error.js";
 export class JsonColumn extends Column {
 
     /**
-     * Embedded JSON schema.
-     */
-    public embeddedSchema: Record<string, unknown> | null = null;
-
-    /**
      * URI to the JSON schema file.
      */
-    public externalSchema: string | null = null;
-
-    /**
-     * Schema location.
-     */
-    public schemaLocation: JsonColumnSchemaLocation =
-        JsonColumnSchemaLocation.External;
+    public schemaUri?: string;
 
     /**
      * Parses a JSON object into a JsonColumn instance.
+     *
+     * @param json - The JSON object instance.
+     * @returns The parsed instance.
      */
     static parse(json: Record<string, unknown>): JsonColumn {
-        const column = new JsonColumn();
+        const column = Column.parseCommonProperties(new JsonColumn(), json);
 
-        column.id = JsonUtils.getRequiredString(json, PropertyNames.Id);
-        column.name = JsonUtils.getRequiredString(json, PropertyNames.Name);
-        column.description = JsonUtils.getString(json, PropertyNames.Description) ?? undefined;
-        column.nullable = JsonUtils.getBoolean(json, PropertyNames.Nullable) ?? undefined;
-        column.optional = JsonUtils.getBoolean(json, PropertyNames.Optional) ?? undefined;
-
-
-        const schema = json[PropertyNames.Schema];
-        if (typeof schema === "string") {
-            column.schemaLocation = JsonColumnSchemaLocation.External;
-            column.externalSchema = schema;
-        } else if (
-            schema != null &&
-            typeof schema === "object" &&
-            !Array.isArray(schema)
-        ) {
-            column.schemaLocation = JsonColumnSchemaLocation.Embedded;
-            column.embeddedSchema = schema as Record<string, unknown>;
-        } else if (schema !== undefined) {
-            throw new CodeListParserError(
-                `JSON type "${typeof schema}" not allowed.`
-            );
-        }
+        column.schemaUri = JsonUtils.getString(json, PropertyNames.SchemaUri) ?? undefined;
 
         return column;
     }
 
     /**
-     * Converts this instance to a JSON object.
+     * Serializes this instance to a JSON object.
+     *
+     * @returns The JSON representation.
      */
     override toJSON(): Record<string, unknown> {
         const json: Record<string, unknown> = {
@@ -86,12 +56,8 @@ export class JsonColumn extends Column {
             json[PropertyNames.Optional] = this.optional;
         }
 
-        if (this.schemaLocation === JsonColumnSchemaLocation.External) {
-            if (this.externalSchema != null) {
-                json[PropertyNames.Schema] = this.externalSchema;
-            }
-        } else if (this.embeddedSchema != null) {
-            json[PropertyNames.Schema] = this.embeddedSchema;
+        if (this.schemaUri != null) {
+            json[PropertyNames.SchemaUri] = this.schemaUri;
         }
 
         return json;

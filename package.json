@@ -1,6 +1,6 @@
 {
-  "name": "opencodelist-ts",
-  "version": "0.2.0",
+  "name": "@openpotato/opencodelist-ts",
+  "version": "0.3.3",
   "description": "A TypeScript library for parsing and building OpenCodeList documents",
   "type": "module",
   "sideEffects": false,
@@ -29,8 +29,9 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "tsdown",
-    "typecheck": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "build:bundle": "tsdown",
+    "build": "npm run typecheck && npm run build:bundle",
     "test": "vitest run",
     "test:contract": "vitest run -c vitest.contract.config.ts",
     "check": "npm run build && npm run typecheck && npm run test && npm run test:contract",
@@ -46,7 +47,8 @@
     "url": "https://github.com/openpotato/opencodelist.ts/issues"
   },
   "engines": {
-    "node": ">=22"
+    "node": ">=22",
+    "npm": ">=11.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.20.1",

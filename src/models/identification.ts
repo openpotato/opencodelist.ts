@@ -16,13 +16,11 @@ export class Identification {
 
     /**
      * Suggested retrieval locations for this document,
-     * in a format other than OpenCodeList.
      */
     public alternateFormatLocations: MimeTypedUri[] = [];
 
     /**
      * Suggested retrieval locations for this document,
-     * in OpenCodeList format, but in a different language.
      */
     public alternateLanguageLocations: LocalizedUri[] = [];
 
@@ -35,6 +33,16 @@ export class Identification {
      * Canonical URI which uniquely identifies this version.
      */
     public canonicalVersionUri!: string;
+
+    /**
+     * A human-readable description for the document.
+     */
+    public description?: string;
+
+    /**
+     * Custom extension properties (`x-*`).
+     */
+    public readonly extensions: Record<string, unknown> = {};
 
     /**
      * A curated list of notable changes for the current version.
@@ -53,7 +61,6 @@ export class Identification {
 
     /**
      * Suggested retrieval locations for this version,
-     * in OpenCodeList format.
      */
     public locationUrls: string[] = [];
 
@@ -93,20 +100,24 @@ export class Identification {
     public version?: string;
 
     /**
-     * Parses a JSON object into an Identification instance.
+     * Parses a JSON object into a Identification instance.
+     *
+     * @param json - The JSON object instance.
+     * @returns The parsed instance.
      */
     static parse(json: Record<string, unknown>): Identification {
         const identification = new Identification();
 
         identification.shortName = JsonUtils.getRequiredString(json, PropertyNames.ShortName);
         identification.longName = JsonUtils.getString(json, PropertyNames.LongName) ?? undefined;
+        identification.description = JsonUtils.getString(json, PropertyNames.Description) ?? undefined;
         identification.version = JsonUtils.getString(json, PropertyNames.Version) ?? undefined;
         identification.publishedAt = JsonUtils.getString(json, PropertyNames.PublishedAt) ?? undefined;
         identification.validFrom = JsonUtils.getString(json, PropertyNames.ValidFrom) ?? undefined;
         identification.validTo = JsonUtils.getString(json, PropertyNames.ValidTo) ?? undefined;
         identification.canonicalUri = JsonUtils.getRequiredString(json, PropertyNames.CanonicalUri);
         identification.canonicalVersionUri = JsonUtils.getRequiredString(json, PropertyNames.CanonicalVersionUri);
-        identification.language = JsonUtils.getString(json, PropertyNames.Language) ?? undefined;
+        identification.language = JsonUtils.getLanguageTag(json, PropertyNames.Language) ?? undefined;
 
         const tags = JsonUtils.getStringArray(json, PropertyNames.Tags);
         if (tags !== undefined) {
@@ -148,11 +159,19 @@ export class Identification {
             identification.alternateFormatLocations.push(...alternateFormatLocations);
         }
 
+        for (const [name, value] of Object.entries(json)) {
+            if (name.startsWith("x-")) {
+                identification.extensions[name] = value;
+            }
+        }
+
         return identification;
     }
 
     /**
-     * Converts this instance to a JSON object.
+     * Serializes this instance to a JSON object.
+     *
+     * @returns The JSON representation.
      */
     toJSON(): Record<string, unknown> {
         const json: Record<string, unknown> = {
@@ -164,6 +183,10 @@ export class Identification {
 
         if (this.longName != null) {
             json[PropertyNames.LongName] = this.longName;
+        }
+
+        if (this.description != null) {
+            json[PropertyNames.Description] = this.description;
         }
 
         if (this.tags.length > 0) {
@@ -210,6 +233,10 @@ export class Identification {
 
         if (this.language != null) {
             json[PropertyNames.Language] = this.language;
+        }
+
+        for (const [name, value] of Object.entries(this.extensions)) {
+            json[name] = value;
         }
 
         return json;

@@ -34,25 +34,24 @@ export class StringColumn extends Column {
 
     /**
      * Parses a JSON object into a StringColumn instance.
+     *
+     * @param json - The JSON object instance.
+     * @returns The parsed instance.
      */
     static parse(json: Record<string, unknown>): StringColumn {
-        const column = new StringColumn();
-
-        column.id = JsonUtils.getRequiredString(json, PropertyNames.Id);
-        column.name = JsonUtils.getRequiredString(json, PropertyNames.Name);
-        column.description = JsonUtils.getString(json, PropertyNames.Description) ?? undefined;
-        column.nullable = JsonUtils.getBoolean(json, PropertyNames.Nullable) ?? undefined;
-        column.optional = JsonUtils.getBoolean(json, PropertyNames.Optional) ?? undefined;
-        column.minLength = JsonUtils.getNumber(json, PropertyNames.MinLength) ?? undefined;
-        column.maxLength = JsonUtils.getNumber(json, PropertyNames.MaxLength) ?? undefined;
+        const column = Column.parseCommonProperties(new StringColumn(), json);
+        column.minLength = JsonUtils.getInteger(json, PropertyNames.MinLength) ?? undefined;
+        column.maxLength = JsonUtils.getInteger(json, PropertyNames.MaxLength) ?? undefined;
         column.pattern = JsonUtils.getString(json, PropertyNames.Pattern) ?? undefined;
-        column.language = JsonUtils.getString(json, PropertyNames.Language) ?? undefined;
+        column.language = JsonUtils.getLanguageTag(json, PropertyNames.Language) ?? undefined;
 
         return column;
     }
 
     /**
-     * Converts this instance to a JSON object.
+     * Serializes this instance to a JSON object.
+     *
+     * @returns The JSON representation.
      */
     override toJSON(): Record<string, unknown> {
         const json: Record<string, unknown> = {

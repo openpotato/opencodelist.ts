@@ -3,14 +3,9 @@
  *  Licensed under the MIT License.
  *---------------------------------------------------------*/
 
-import { SemVer } from "semver";
+import { SemVer, Range } from "semver";
 import { Annotation } from "./models/annotation.js";
 import { Identification } from "./models/identification.js";
-
-/**
- * The OpenCodeList version supported by this library.
- */
-export const MINIMUM_COMPATIBLE_OPEN_CODE_LIST_VERSION = "0.3.0" as const;
 
 /**
  * Options for JSON serialization.
@@ -30,14 +25,13 @@ export interface SerializeOptions {
 
 /**
  * An abstract OpenCodeList base document for CodeListDocument and
- * CodeListSetDocument.
  */
-export abstract class Document {
-    private static readonly implementedVersion = new SemVer("0.3.0");
-    private static readonly minimumCompatibleVersion = new SemVer("0.3.0");
+export abstract class CodeListBase {
 
     /**
      * Creates a new instance of the Document class.
+     *
+     * @returns The new instance.
      */
     constructor() {
         this.identification = new Identification();
@@ -46,10 +40,32 @@ export abstract class Document {
     /**
      * Serialization options.
      */
-    public static readonly defaultSerializeOptions: Readonly<SerializeOptions> = {
+    protected static readonly defaultSerializeOptions: Readonly<SerializeOptions> = {
         pretty: true,
         indent: 2,
     };
+
+    /**
+     * Returns the implemented OpenCodeList version.
+     */
+    public static readonly implementedVersion = new SemVer("0.4.0");
+
+    /**
+     * Returns the minimum compatible OpenCodeList version.
+     */
+    public static readonly minimumCompatibleVersion = new SemVer("0.4.0");
+
+    /**
+     * The range of OpenCodeList versions supported by this library.
+     */
+    public static readonly supportedVersionRange = new Range(
+        `>=${CodeListBase.minimumCompatibleVersion.version} <0.5.0`
+    );
+
+    /**
+     * The implemented OpenCodeList version as string.
+     */
+    public static readonly version: string = CodeListBase.implementedVersion.version;
 
     /**
      * Annotations for the document.
@@ -72,30 +88,9 @@ export abstract class Document {
     public metaOnly: boolean = true;
 
     /**
-     * The implemented OpenCodeList version as string
-     */
-    public readonly version = Document.getImplementedVersion();
-
-    /**
-     * Returns the implemented OpenCodeList version.
-     * 
-     * @returns An OpenCodeList version
-     */
-    public static getImplementedVersion(): SemVer {
-        return Document.implementedVersion;
-    }
-
-    /**
-     * Returns the minimum compatible OpenCodeList version.
-     * 
-     * @returns An OpenCodeList version
-     */
-    public static getMinimumCompatibleVersion(): SemVer {
-        return Document.minimumCompatibleVersion;
-    }
-
-    /**
      * Clears the metadata and content of this document instance.
+     *
+     * @returns No return value.
      */
     clear(): void {
         this.annotation = null;
@@ -106,6 +101,9 @@ export abstract class Document {
 
     /**
      * Clears only the content of this document instance.
+     *
+     * @param convertToMetaOnly - The convertToMetaOnly value.
+     * @returns No return value.
      */
     clearContent(convertToMetaOnly: boolean): void {
         if (convertToMetaOnly) {
@@ -115,15 +113,21 @@ export abstract class Document {
 
     /**
      * Converts this document to a JSON object.
+     *
+     * @param metaOnly - The metaOnly value.
+     * @returns The JSON representation.
      */
     abstract toJSON(metaOnly?: boolean): Record<string, unknown>;
 
     /**
      * Serializes this document as formatted JSON.
+     *
+     * @param options - The options value.
+     * @returns The operation result.
      */
     serialize(metaOnly = this.metaOnly, options?: SerializeOptions): string {
         const effective = {
-            ...Document.defaultSerializeOptions,
+            ...CodeListBase.defaultSerializeOptions,
             ...options,
         };
 
@@ -133,6 +137,9 @@ export abstract class Document {
 
     /**
      * Serializes this document as formatted JSON with metadata only.
+     *
+     * @param options - The options value.
+     * @returns The operation result.
      */
     serializeMetaOnly(options?: SerializeOptions): string {
         return this.serialize(true, options);

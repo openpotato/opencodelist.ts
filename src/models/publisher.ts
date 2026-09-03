@@ -13,6 +13,11 @@ import { Identifier } from "./identifier.js";
 export class Publisher {
 
     /**
+     * The extensions value.
+     */
+    public readonly extensions: Record<string, unknown> = {};
+
+    /**
      * Identifier for the publisher.
      */
     public identifier?: Identifier;
@@ -34,6 +39,9 @@ export class Publisher {
 
     /**
      * Parses a JSON object into a Publisher instance.
+     *
+     * @param json - The JSON object instance.
+     * @returns The parsed instance.
      */
     static parse(json: Record<string, unknown>): Publisher {
         const publisher = new Publisher();
@@ -43,11 +51,19 @@ export class Publisher {
         publisher.url = JsonUtils.getString(json, PropertyNames.Url) ?? undefined;
         publisher.identifier = Identifier.parse(JsonUtils.getObject(json, PropertyNames.Identifier));
 
+        for (const [name, value] of Object.entries(json)) {
+            if (name.startsWith("x-")) {
+                publisher.extensions[name] = value;
+            }
+        }
+
         return publisher;
     }
 
     /**
-     * Converts this instance to a JSON object.
+     * Serializes this instance to a JSON object.
+     *
+     * @returns The JSON representation.
      */
     toJSON(): Record<string, unknown> {
         const json: Record<string, unknown> = {
@@ -64,6 +80,10 @@ export class Publisher {
 
         if (this.url != null) {
             json[PropertyNames.Url] = this.url;
+        }
+
+        for (const [name, value] of Object.entries(this.extensions)) {
+            json[name] = value;
         }
 
         return json;

@@ -6,21 +6,29 @@
 import { PropertyNames } from "./../dictionaries/property-names.js";
 import { TypeConsts } from "./../dictionaries/type-consts.js";
 import { JsonUtils } from "./../utils/json-utils.js";
+import { Annotation } from "./annotation.js";
 import { DocumentRef } from "./document-ref.js";
 
 /**
- * An external code list set reference.
+ * Represents CodeListSetDocumentRef.
  */
 export class CodeListSetDocumentRef extends DocumentRef {
 
     /**
-     * Parses a JSON object into a CodeListSetDocumentRef instance.
+     * Static method to parse a JSON object into a CodeListSetDocumentRef instance.
+     *
+     * @param json - The JSON object instance.
+     * @returns The parsed instance.
      */
     static parse(json: Record<string, unknown>): CodeListSetDocumentRef {
         const documentRef = new CodeListSetDocumentRef();
-
         documentRef.canonicalUri = JsonUtils.getRequiredString(json, PropertyNames.CanonicalUri);
         documentRef.canonicalVersionUri = JsonUtils.getString(json, PropertyNames.CanonicalVersionUri) ?? undefined;
+
+        const annotation = JsonUtils.getObject(json, PropertyNames.Annotation);
+        if (annotation !== undefined) {
+            documentRef.annotation = Annotation.parse(annotation);
+        }
 
         const locationUrls = JsonUtils.getStringArray(json, PropertyNames.LocationUrls);
         if (locationUrls !== undefined) {
@@ -31,23 +39,28 @@ export class CodeListSetDocumentRef extends DocumentRef {
     }
 
     /**
-     * Converts this instance to a JSON object.
+     * Serializes this instance to a JSON object.
+     *
+     * @param includeType - Whether to include the type property.   
+     * @returns The JSON representation.
      */
-    override toJSON(): Record<string, unknown> {
+    override toJSON(includeType = true): Record<string, unknown> {
         const json: Record<string, unknown> = {
-            [PropertyNames.Type]: TypeConsts.CodeListSetRef,
             [PropertyNames.CanonicalUri]: this.canonicalUri,
         };
 
-        if (this.canonicalVersionUri != null) {
-            json[PropertyNames.CanonicalVersionUri] =
-                this.canonicalVersionUri;
+        if (includeType) {
+            json[PropertyNames.Type] = TypeConsts.CodeListSetRef;
         }
-
+        if (this.annotation != null) {
+            json[PropertyNames.Annotation] = this.annotation.toJSON();
+        }
+        if (this.canonicalVersionUri != null) {
+            json[PropertyNames.CanonicalVersionUri] = this.canonicalVersionUri;
+        }
         if (this.locationUrls.length > 0) {
             json[PropertyNames.LocationUrls] = [...this.locationUrls];
         }
-
         return json;
     }
 }

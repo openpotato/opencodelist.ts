@@ -27,7 +27,10 @@ export class IdentifierSource {
     public url?: string;
 
     /**
-     * Parses a JSON object into an IdentifierSource instance.
+     * Parses a JSON object into a IdentifierSource instance.
+     *
+     * @param json - The JSON object instance.
+     * @returns The parsed instance.
      */
     public static parse(json: Record<string, unknown> | undefined): IdentifierSource | undefined {
         if (json == null) {
@@ -44,7 +47,9 @@ export class IdentifierSource {
     }
 
     /**
-     * Converts this instance to a JSON object.
+     * Serializes this instance to a JSON object.
+     *
+     * @returns The JSON representation.
      */
     toJSON(): Record<string, unknown> {
         const json: Record<string, unknown> = {

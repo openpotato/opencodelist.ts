@@ -23,7 +23,10 @@ export class Identifier {
     public source?: IdentifierSource;
 
     /**
-     * Parses a JSON object into an Identifier instance.
+     * Parses a JSON object into a Identifier instance.
+     *
+     * @param json - The JSON object instance.
+     * @returns The parsed instance.
      */
     public static parse(json: Record<string, unknown> | undefined): Identifier | undefined {
         if (json == null) {
@@ -39,7 +42,9 @@ export class Identifier {
     }
 
     /**
-     * Converts this instance to a JSON object.
+     * Serializes this instance to a JSON object.
+     *
+     * @returns The JSON representation.
      */
     toJSON(): Record<string, unknown> {
         const json: Record<string, unknown> = {

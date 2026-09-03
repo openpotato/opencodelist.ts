@@ -7,9 +7,9 @@ describe("Package contract (dist)", () => {
         expect(pkg).toBeDefined();
         expect(pkg.CodeListDocument).toBeDefined();
         expect(pkg.CodeListSetDocument).toBeDefined();
-        expect(pkg.DocumentLoader).toBeDefined();
+        expect(pkg.CodeListLoader).toBeDefined();
         expect(pkg.CodeListParserError).toBeDefined();
-        expect(pkg.Document).toBeDefined();
+        expect(pkg.CodeListBase).toBeDefined();
     });
 
     it("loads models and dictionaries subpath outputs", async () => {

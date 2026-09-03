@@ -3,22 +3,23 @@
  *  Licensed under the MIT License.
  *---------------------------------------------------------*/
 
-import { valid, lt, gt } from "semver";
 import { PropertyNames } from "./dictionaries/property-names.js";
 import { JsonUtils } from "./utils/json-utils.js";
 import { Annotation } from "./models/annotation.js";
 import { DocumentRefs } from "./models/document-refs.js";
 import { Identification } from "./models/identification.js";
+import { CodeListBase } from "./code-list-base.js";
 import { CodeListParserError } from "./code-list-parser-error.js";
-import { Document } from "./document.js";
 
 /**
  * A code list set document according to the OpenCodeList specification.
  */
-export class CodeListSetDocument extends Document {
+export class CodeListSetDocument extends CodeListBase {
     
     /**
      * Creates a new instance of the CodeListSetDocument class.
+     *
+     * @returns The new instance.
      */
     constructor() {
         super();
@@ -32,21 +33,22 @@ export class CodeListSetDocument extends Document {
 
     /**
      * Creates a document from a JSON object.
+     *
+     * @param root - The root value.
+     * @returns The parsed instance.
      */
     static parse(root: Record<string, unknown>): CodeListSetDocument {
-        const version = root[PropertyNames.OpenCodeList];
-
         const openCodeListVersion = JsonUtils.getRequiredString(root, PropertyNames.OpenCodeList);
 
-        if (
-            valid(openCodeListVersion) == null ||
-            lt(openCodeListVersion, Document.getMinimumCompatibleVersion()) ||
-            gt(openCodeListVersion, Document.getImplementedVersion())
-        ) {
+        if (!CodeListBase.supportedVersionRange.test(openCodeListVersion)) {
             throw new CodeListParserError(
                 `Unsupported OpenCodeList version '${openCodeListVersion}'.`
             );
         }        
+
+        if (root[PropertyNames.CodeList] !== undefined) {
+            throw new CodeListParserError(`OpenCodeList document must contain exactly one of "${PropertyNames.CodeList}" or "${PropertyNames.CodeListSet}".`);
+        }
 
         const codeListSet = root[PropertyNames.CodeListSet];
 
@@ -68,6 +70,10 @@ export class CodeListSetDocument extends Document {
 
     /**
      * Parses the inner code list set object.
+     *
+     * @param root - The root value.
+     * @param codeListSet - The codeListSet value.
+     * @returns The operation result.
      */
     static parseContent(
         root: Record<string, unknown>,
@@ -75,43 +81,23 @@ export class CodeListSetDocument extends Document {
     ): CodeListSetDocument {
         const document = new CodeListSetDocument();
 
-        const comments = root[PropertyNames.Comments];
-        if (Array.isArray(comments)) {
-            for (const comment of comments) {
-                if (typeof comment === "string") {
-                    document.comments.push(comment);
-                }
-            }
+        const comments = JsonUtils.getStringArray(root, PropertyNames.Comments);
+        if (comments !== undefined) {
+            document.comments.push(...comments);
         }
 
-        const annotation = codeListSet[PropertyNames.Annotation];
-        if (
-            annotation != null &&
-            typeof annotation === "object" &&
-            !Array.isArray(annotation)
-        ) {
-            document.annotation = Annotation.parse(
-                annotation as Record<string, unknown>
-            );
-        }
-
-        const identification = codeListSet[PropertyNames.Identification];
-        if (
-            identification == null ||
-            typeof identification !== "object" ||
-            Array.isArray(identification)
-        ) {
-            throw new CodeListParserError(
-                `Missing required property '${PropertyNames.Identification}'.`
-            );
+        const annotation = JsonUtils.getObject(codeListSet, PropertyNames.Annotation);
+        if (annotation !== undefined) {
+            document.annotation = Annotation.parse(annotation);
         }
 
         document.identification = Identification.parse(
-            identification as Record<string, unknown>
+            JsonUtils.getRequiredObject(codeListSet, PropertyNames.Identification)
         );
 
-        const referenceSet = codeListSet[PropertyNames.ReferenceSet];
-        if (Array.isArray(referenceSet)) {
+        const referenceSet = JsonUtils.getArray(codeListSet, PropertyNames.ReferenceSet);
+        if (referenceSet !== undefined) {
+            document.metaOnly = false;
             document.documentRefs.parseAndAdd(referenceSet);
         }
 
@@ -120,6 +106,9 @@ export class CodeListSetDocument extends Document {
 
     /**
      * Clears only the content of this document instance.
+     *
+     * @param convertToMetaOnly - The convertToMetaOnly value.
+     * @returns No return value.
      */
     override clearContent(convertToMetaOnly: boolean): void {
         this.documentRefs.clear();
@@ -128,6 +117,8 @@ export class CodeListSetDocument extends Document {
 
     /**
      * Converts the document to JSON.
+     *
+     * @returns The JSON representation.
      */
     override toJSON(metaOnly = this.metaOnly): Record<string, unknown> {
         const codeListSet: Record<string, unknown> = {
@@ -143,7 +134,7 @@ export class CodeListSetDocument extends Document {
         }
 
         const root: Record<string, unknown> = {
-            [PropertyNames.OpenCodeList]: Document.getMinimumCompatibleVersion().toString(),
+            [PropertyNames.OpenCodeList]: CodeListBase.implementedVersion.toString(),
             [PropertyNames.CodeListSet]: codeListSet,
         };
 

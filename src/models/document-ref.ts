@@ -3,15 +3,22 @@
  *  Licensed under the MIT License.
  *---------------------------------------------------------*/
 
+import { Annotation } from "./annotation.js";
+
 /**
- * An external code list reference.
+ * An external OpenCodeList document reference.
  */
 export abstract class DocumentRef {
 
     /**
+     * User annotation information.
+     */
+    public annotation?: Annotation;
+
+    /**
      * Canonical URI which uniquely identifies all versions (collectively).
      */
-    public canonicalUri: string | null = null;
+    public canonicalUri!: string;
 
     /**
      * Canonical URI which uniquely identifies this version.
@@ -24,7 +31,10 @@ export abstract class DocumentRef {
     public readonly locationUrls: string[] = [];
 
     /**
-     * Converts this instance to a JSON object.
+     * Serializes this instance to a JSON object.
+     *
+     * @param includeType - The includeType value.
+     * @returns The JSON representation.
      */
-    abstract toJSON(): Record<string, unknown>;
+    abstract toJSON(includeType?: boolean): Record<string, unknown>;
 }

@@ -23,6 +23,9 @@ export class MimeTypedUri {
 
     /**
      * Parses a JSON object into a MimeTypedUri instance.
+     *
+     * @param json - The JSON object instance.
+     * @returns The parsed instance.
      */
     static parse(json: Record<string, unknown>): MimeTypedUri {
         const mimeTypedUri = new MimeTypedUri();
@@ -34,7 +37,9 @@ export class MimeTypedUri {
     }
 
     /**
-     * Converts this instance to a JSON object.
+     * Serializes this instance to a JSON object.
+     *
+     * @returns The JSON representation.
      */
     toJSON(): Record<string, unknown> {
         return {

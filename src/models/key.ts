@@ -7,6 +7,7 @@ import { PropertyNames } from "./../dictionaries/property-names.js";
 import { JsonUtils } from "./../utils/json-utils.js";
 import { Columns } from "./columns.js";
 import type { CodeListDocument } from "./../code-list-document.js";
+import type { LocalizableString } from "./localizable-string.js";
 
 /**
  * A key definition.
@@ -15,6 +16,9 @@ export class Key {
 
     /**
      * Creates a new key.
+     *
+     * @param document - The document value.
+     * @returns The new instance.
      */
     constructor(document: CodeListDocument) {
         this.columns = new Columns(document);
@@ -28,7 +32,7 @@ export class Key {
     /**
      * A brief description of the key.
      */
-    public description: string | null = null;
+    public description: LocalizableString | null = null;
 
     /**
      * The unique ID of the key.
@@ -38,39 +42,41 @@ export class Key {
     /**
      * The name of the key.
      */
-    public name: string | null = null;
+    public name: LocalizableString | null = null;
 
     /**
      * Parses a JSON object into a Key instance.
+     *
+     * @param json - The JSON object instance.
+     * @param codeList - The CodeListDocument instance.
+     * @returns The parsed instance.
      */
-    static parse(
-        json: Record<string, unknown>,
-        codeList: CodeListDocument
-    ): Key {
+    static parse(json: Record<string, unknown>, codeList: CodeListDocument): Key {
         const key = new Key(codeList);
 
         key.id = JsonUtils.getRequiredString(json, PropertyNames.Id);
 
-        const name = JsonUtils.getString(json, PropertyNames.Name);
+        const name = JsonUtils.getLocalizableString(json, PropertyNames.Name);
         if (name !== undefined) {
             key.name = name;
         }
 
-        const description = JsonUtils.getString(json, PropertyNames.Description);
+        const description = JsonUtils.getLocalizableString(json, PropertyNames.Description);
         if (description !== undefined) {
             key.description = description;
         }
 
-        const columnIds = JsonUtils.getArray(json, PropertyNames.ColumnIds);
-        if (columnIds !== undefined) {
-            key.columns.parseAndAdd(columnIds);
-        }
+        key.columns.parseAndAdd(
+            JsonUtils.getRequiredArray(json, PropertyNames.ColumnIds)
+        );
 
         return key;
     }
 
     /**
-     * Converts this instance to a JSON object.
+     * Serializes this instance to a JSON object.
+     *
+     * @returns The JSON representation.
      */
     toJSON(): Record<string, unknown> {
         const json: Record<string, unknown> = {

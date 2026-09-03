@@ -58,7 +58,7 @@ export const PropertyNames = {
     Publisher: "publisher",
     ReferenceSet: "referenceSet",
     Rows: "rows",
-    Schema: "schema",
+    SchemaUri: "schemaUri",
     ShortName: "shortName",
     Source: "source",
     Tags: "tags",

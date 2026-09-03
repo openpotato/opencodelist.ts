@@ -10,9 +10,6 @@ import { Column } from "./column.js";
 
 /**
  * This is a time only type column. The serialized format must match the native JSON string
- * with the JSON Schema format `time`.
- *
- * See: https://json-schema.org/understanding-json-schema/reference/string
  */
 export class TimeOnlyColumn extends Column {
     /**
@@ -27,15 +24,12 @@ export class TimeOnlyColumn extends Column {
 
     /**
      * Parses a JSON object into a TimeOnlyColumn instance.
+     *
+     * @param json - The JSON object instance.
+     * @returns The parsed instance.
      */
     static parse(json: Record<string, unknown>): TimeOnlyColumn {
-        const column = new TimeOnlyColumn();
-
-        column.id = JsonUtils.getRequiredString(json, PropertyNames.Id);
-        column.name = JsonUtils.getRequiredString(json, PropertyNames.Name);
-        column.description = JsonUtils.getString(json, PropertyNames.Description) ?? undefined;
-        column.nullable = JsonUtils.getBoolean(json, PropertyNames.Nullable) ?? undefined;
-        column.optional = JsonUtils.getBoolean(json, PropertyNames.Optional) ?? undefined;
+        const column = Column.parseCommonProperties(new TimeOnlyColumn(), json);
         column.minValue = JsonUtils.getString(json, PropertyNames.MinValue) ?? undefined;
         column.maxValue = JsonUtils.getString(json, PropertyNames.MaxValue) ?? undefined;
 
@@ -43,7 +37,9 @@ export class TimeOnlyColumn extends Column {
     }
 
     /**
-     * Converts this instance to a JSON object.
+     * Serializes this instance to a JSON object.
+     *
+     * @returns The JSON representation.
      */
     override toJSON(): Record<string, unknown> {
         const json: Record<string, unknown> = {

@@ -5,7 +5,6 @@
 
 import { PropertyNames } from "./../dictionaries/property-names.js";
 import { TypeConsts } from "./../dictionaries/type-consts.js";
-import { JsonUtils } from "./../utils/json-utils.js";
 import { Column } from "./column.js";
 
 /**
@@ -15,21 +14,20 @@ export class BooleanColumn extends Column {
 
     /**
      * Parses a JSON object into a BooleanColumn instance.
+     *
+     * @param json - The JSON object instance.
+     * @returns The parsed instance.
      */
     static parse(json: Record<string, unknown>): BooleanColumn {
-        const column = new BooleanColumn();
-
-        column.id = JsonUtils.getRequiredString(json, PropertyNames.Id);
-        column.name = JsonUtils.getRequiredString(json, PropertyNames.Name);
-        column.description = JsonUtils.getString(json, PropertyNames.Description) ?? undefined;
-        column.nullable = JsonUtils.getBoolean(json, PropertyNames.Nullable) ?? undefined;
-        column.optional = JsonUtils.getBoolean(json, PropertyNames.Optional) ?? undefined;
+        const column = Column.parseCommonProperties(new BooleanColumn(), json);
 
         return column;
     }
 
     /**
-     * Converts this instance to a JSON object.
+     * Serializes this instance to a JSON object.
+     *
+     * @returns The JSON representation.
      */
     override toJSON(): Record<string, unknown> {
         const json: Record<string, unknown> = {

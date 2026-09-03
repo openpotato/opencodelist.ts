@@ -23,18 +23,23 @@ export class LocalizedUri {
 
     /**
      * Parses a JSON object into a LocalizedUri instance.
+     *
+     * @param json - The JSON object instance.
+     * @returns The parsed instance.
      */
     static parse(json: Record<string, unknown>): LocalizedUri {
         const localizedUri = new LocalizedUri();
 
-        localizedUri.language = JsonUtils.getRequiredString(json, PropertyNames.Language);
+        localizedUri.language = JsonUtils.getRequiredLanguageTag(json, PropertyNames.Language);
         localizedUri.url = JsonUtils.getRequiredString(json, PropertyNames.Url);
 
         return localizedUri;
     }
 
     /**
-     * Converts this instance to a JSON object.
+     * Serializes this instance to a JSON object.
+     *
+     * @returns The JSON representation.
      */
     toJSON(): Record<string, unknown> {
         return {

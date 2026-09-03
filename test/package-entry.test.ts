@@ -4,8 +4,8 @@ import {
     CodeListDocument,
     CodeListSetDocument,
     CodeListParserError,
-    Document,
-    DocumentLoader,
+    CodeListBase,
+    CodeListLoader,
 } from "../src/index.js";
 
 describe("Package entry exports", () => {
@@ -13,7 +13,7 @@ describe("Package entry exports", () => {
         expect(CodeListDocument).toBeDefined();
         expect(CodeListSetDocument).toBeDefined();
         expect(CodeListParserError).toBeDefined();
-        expect(DocumentLoader).toBeDefined();
-        expect(Document).toBeDefined();
+        expect(CodeListLoader).toBeDefined();
+        expect(CodeListBase).toBeDefined();
     });
 });

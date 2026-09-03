@@ -23,7 +23,7 @@ describe("CodeListDocument", () => {
         expect(document.identification.alternateLanguageLocations[0]?.url).toBe("https://example.com/codelist-2025-01-01.de.json");
         expect(document.identification.alternateFormatLocations[0]?.mimeType).toBe("text/csv");
         expect(document.identification.alternateFormatLocations[0]?.url).toBe("https://example.com/codelist-2025-01-01.csv");
-        expect(document.columns.count).toBe(11);
+        expect(document.columns.count).toBe(13);
         expect(document.columns.getAt(0).id).toBe("code");
         expect(document.rows.count).toBe(3);
         expect(document.rows.getAt(0).get("code")).toBe("c-1");
@@ -34,6 +34,7 @@ describe("CodeListDocument", () => {
         expect(document.rows.getAt(0).get("enumSet")).toEqual(["e1", "e3"]);
         expect(document.rows.getAt(1).get("code")).toBe("c-2");
         expect(document.rows.getAt(1).get("federalState")).toBe("BE");
+        expect(document.rows.getAt(1).get("longName")).toEqual({ "en": "BE", "de": "BE" });
         expect(document.rows.getAt(1).get("bool")).toBe(false);
         expect(document.rows.getAt(1).get("enumSet")).toEqual([]);
     });

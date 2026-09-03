@@ -2,8 +2,9 @@ pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-- group: 'npm-package-config'
 - group: 'github-config'
+- group: 'npm-package-config'
+- group: 'azure-artifacts-config'
 
 stages:
 
@@ -23,6 +24,8 @@ stages:
       displayName: 'Install Node.js'
       inputs:
         version: '$(node.version)'
+    - script: npm install --global npm@11.18.0
+      displayName: 'Use npm 11.18.0'    
     - task: Npm@1
       displayName: 'Install dependencies'
       inputs:
@@ -38,7 +41,8 @@ stages:
         command: 'custom'
         customCommand: 'run check --if-present'
 
-- stage: Deploy  
+- stage: DeployToPublic  
+  displayName: 'Deploy to npm'
   dependsOn: Test
   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
   jobs:
@@ -50,6 +54,8 @@ stages:
       displayName: 'Install Node.js'
       inputs:
         version: '22.x'
+    - script: npm install --global npm@11.18.0
+      displayName: 'Use npm 11.18.0'    
     - task: Npm@1
       displayName: 'Install dependencies'
       inputs:
@@ -59,13 +65,10 @@ stages:
       inputs:
         command: 'custom'
         customCommand: 'run check --if-present'
-    - task: Npm@1
-      displayName: 'Package'
-      inputs:
-        command: 'custom'
-        customCommand: 'pack'
     - task: PowerShell@2
       displayName: 'Push to GitHub'
+      env:
+        PAT: $(PAT)
       inputs:
         targetType: inline
         pwsh: true
@@ -105,11 +108,11 @@ stages:
             git remote remove github 2>$null | Out-Null
             
           }
-      env:
-        PAT: $(PAT)
     - task: PowerShell@2
       displayName: 'Publish to npm Registry'
       condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+      env:
+        NPM_TOKEN: $(NPM_TOKEN)
       inputs:
         targetType: 'inline'
         pwsh: true
@@ -136,5 +139,46 @@ stages:
             Remove-Item ".npmrc" -ErrorAction SilentlyContinue
 
           }
+
+- stage: DeployToDevelop
+  displayName: 'Deploy to Azure Artifacts'
+  dependsOn: Test
+  condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/heads/features/'))
+  jobs:
+  - job: Deploy
+    steps:
+    - checkout: self
+      fetchDepth: 0
+    - task: UseNode@1
+      displayName: 'Install Node.js'
+      inputs:
+        version: '22.x'
+    - script: npm install --global npm@11.18.0
+      displayName: 'Use npm 11.18.0'    
+    - task: Npm@1
+      displayName: 'Install dependencies'
+      inputs:
+        command: 'install'
+    - task: Npm@1
+      displayName: 'Check'
+      inputs:
+        command: 'custom'
+        customCommand: 'run check --if-present'
+    - task: PowerShell@2
+      displayName: 'Create Azure Artifacts .npmrc'
       env:
-        NPM_TOKEN: $(NPM_TOKEN)
+        AZA_REGISTRY_URL: $(AZA_REGISTRY_URL)
+      inputs:
+        targetType: 'inline'
+        pwsh: true
+        script: |
+          @"
+          registry=$env:AZA_REGISTRY_URL
+          always-auth=true
+          "@ | Out-File -FilePath ".npmrc" -Encoding utf8
+    - task: npmAuthenticate@0
+      displayName: 'Authenticate Azure Artifacts npm feed'
+      inputs:
+        workingFile: '.npmrc'
+    - script: npm publish
+      displayName: 'Publish to Azure Artifacts'

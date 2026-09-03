@@ -35,23 +35,24 @@ export class NumberColumn extends Column {
 
     /**
      * Parses a JSON object into a NumberColumn instance.
+     *
+     * @param json - The JSON object instance.
+     * @returns The parsed instance.
      */
     static parse(json: Record<string, unknown>): NumberColumn {
-        const column = new NumberColumn();
-
-        column.id = JsonUtils.getRequiredString(json, PropertyNames.Id);
-        column.name = JsonUtils.getRequiredString(json, PropertyNames.Name);
-        column.description = JsonUtils.getString(json, PropertyNames.Description) ?? undefined;
-        column.nullable = JsonUtils.getBoolean(json, PropertyNames.Nullable) ?? undefined;
-        column.optional = JsonUtils.getBoolean(json, PropertyNames.Optional) ?? undefined;
+        const column = Column.parseCommonProperties(new NumberColumn(), json);
         column.minValue = JsonUtils.getNumber(json, PropertyNames.MinValue) ?? undefined;
         column.maxValue = JsonUtils.getNumber(json, PropertyNames.MaxValue) ?? undefined;
+        column.exclusiveMinValue = JsonUtils.getNumber(json, PropertyNames.ExclusiveMinValue) ?? undefined;
+        column.exclusiveMaxValue = JsonUtils.getNumber(json, PropertyNames.ExclusiveMaxValue) ?? undefined;
 
         return column;
     }
 
     /**
-     * Converts this instance to a JSON object.
+     * Serializes this instance to a JSON object.
+     *
+     * @returns The JSON representation.
      */
     override toJSON(): Record<string, unknown> {
         const json: Record<string, unknown> = {
