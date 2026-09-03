@@ -1,5 +1,5 @@
 {
-  "name": "@openpotato/opencodelist-ts",
+  "name": "@stuebersystems/opencodelist-ts",
   "version": "0.3.3",
   "publishConfig": {
     "access": "public"
