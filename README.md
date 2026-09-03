@@ -1,4 +1,4 @@
-[![npm](https://img.shields.io/npm/v/opencodelist-ts.svg)](https://www.npmjs.com/package/opencodelist-ts)
+[![npm](https://img.shields.io/npm/v/@stuebersystems/opencodelist-ts.svg)](https://www.npmjs.com/package/@stuebersystems/opencodelist-ts)
 ![GitHub](https://img.shields.io/github/license/openpotato/opencodelist.ts)
 
 # opencodelist-ts
