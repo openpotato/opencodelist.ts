@@ -1,6 +1,9 @@
 {
   "name": "@openpotato/opencodelist-ts",
   "version": "0.3.3",
+  "publishConfig": {
+    "access": "public"
+  },
   "description": "A TypeScript library for parsing and building OpenCodeList documents",
   "type": "module",
   "sideEffects": false,

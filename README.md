@@ -5,10 +5,11 @@
 
 A [TypeScript](https://www.typescriptlang.org/) library for parsing and building [OpenCodeList](https://openpotato.github.io/opencodelist/en/) documents.
 
-+ Supports [Node.js](https://nodejs.org/) 22+
-+ Includes document classes for code list and code list set documents
-+ Provides parser/loader APIs and JSON serialization helpers
-+ Ships ESM (ECMAScript Modules), CJS (CommonJS), and TypeScript declarations
++ Supports [Node.js](https://nodejs.org/) 22+.
++ Supports OpenCodeList version `0.4.x.`.
++ Includes document classes for code list and code list set documents.
++ Provides parser/loader APIs and JSON serialization helpers.
++ Ships ESM (ECMAScript Modules), CJS (CommonJS), and TypeScript declarations.
 
 ## Installation
 
